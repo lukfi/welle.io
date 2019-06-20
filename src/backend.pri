@@ -24,19 +24,18 @@ unix:!macx:!android: {
 
 win32: {
     INCLUDEPATH += ../../../welle.io-win-libs/include
-    LIBS    += -L../../../welle.io-win-libs/x86
+    LIBS    += -L../../../welle.io-win-libs/x64
     LIBS    += -lfftw3f-3
     LIBS    += -lole32
     LIBS    += -lwinpthread
     LIBS    += -lwinmm
     LIBS    += -lstdc++
-    LIBS    += -lws2_32
     LIBS    += -llibfaad
     LIBS    += -lmp3lame
     LIBS    += -lmpg123-0
     LIBS    += -lusb-1.0
     LIBS    += -lws2_32
-    CONFIG  += airspy
+    #CONFIG  += airspy
     CONFIG  += rtl_sdr
     #CONFIG  += soapysdr
 }
