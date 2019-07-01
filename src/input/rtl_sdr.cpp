@@ -84,7 +84,7 @@ CRTL_SDR::CRTL_SDR(RadioControllerInterface& radioController) :
 
     // Get tuner gains
     uint32_t gainsCount = rtlsdr_get_tuner_gains(device, NULL);
-    std::clog << "RTL_SDR:" << " Supported gain values" << gainsCount << std::endl;
+    std::clog << "RTL_SDR:" << " Supported gain values: " << gainsCount << std::endl;
     gains.resize(gainsCount);
     gainsCount = rtlsdr_get_tuner_gains(device, gains.data());
 
@@ -177,7 +177,7 @@ float CRTL_SDR::getGain() const
 float CRTL_SDR::setGain(int gain_index)
 {
     if ((size_t)gain_index >= gains.size()) {
-        std::clog << "RTL_SDR:" << "Unknown gain count" << gain_index << std::endl;
+        std::clog << "RTL_SDR: " << "Unknown gain count " << gain_index << std::endl;
         return 0;
     }
 

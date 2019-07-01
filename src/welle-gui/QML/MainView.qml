@@ -152,6 +152,11 @@ ApplicationWindow {
                 Layout.fillWidth: true
             }
 
+            Switch  {
+                id: fmdvbt
+                text: qsTr("FM/DVBT")
+            }
+
             ToolButton {
                 icon.name: "menu"
                 onClicked: optionsMenu.open()
@@ -315,7 +320,10 @@ ApplicationWindow {
                     channelNameText: channelName
                     isFavorit: favorit
                     isExpert: isExpertView
-                    onClicked: radioController.play(channelName, stationName, stationSId)
+                    onClicked: {
+                        console.log("LF: Playing:", channelName, stationName, stationSId)
+                        radioController.play(channelName, stationName, stationSId)
+                    }
                     onFavoritClicked: {
                         var favoritInvert = !favorit
                         stationList.setFavorit(stationSId, favoritInvert) // Invert favorit

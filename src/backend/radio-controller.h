@@ -115,7 +115,7 @@ class RadioControllerInterface {
         virtual void onMessage(message_level_t level, const std::string& text) = 0;
 
         /* The receiver has shutdown */
-        virtual void onShutdown(void) { };
+        virtual void onShutdown(void) { }
 
 };
 

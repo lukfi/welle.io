@@ -188,6 +188,7 @@ void CRadioController::setDeviceParam(QString param, QString value)
 
 void CRadioController::play(QString channel, QString title, quint32 service)
 {
+    printf("PLAY: %s %s %d\n", channel.toLatin1().data(), title.toLatin1().data(), service);
     if (channel == "") {
         return;
     }
