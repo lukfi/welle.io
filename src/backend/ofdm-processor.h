@@ -52,11 +52,11 @@ class OFDMProcessor
 // Identifier "interface" is already defined in the w32api header basetype.h
     public:
         OFDMProcessor(InputInterface& inputInterface,
-                const DABParams& params,
-                RadioControllerInterface& ri,
-                MscHandler& msc,
-                FicHandler& fic,
-                RadioReceiverOptions rro);
+                      const DABParams& params,
+                      RadioControllerInterface& ri,
+                      MscHandler& msc,
+                      FicHandler& fic,
+                      RadioReceiverOptions rro);
         ~OFDMProcessor();
         void reset();
         void stop();

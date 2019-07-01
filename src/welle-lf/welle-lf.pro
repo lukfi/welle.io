@@ -8,10 +8,16 @@ CONFIG -= qt
 INCLUDEPATH += ../../../Common/System ../../../Common/Multimedia
 
 SOURCES += \
+#        Filter.cpp \
+#        FmDecoder.cpp \
         main.cpp \
-        radiocontroller.cpp
+        radiocontroller.cpp \
+        radioreceiverfm.cpp
 
 HEADERS += \
-    radiocontroller.h
+#    Filter.h \
+#    FmDecoder.h \
+    radiocontroller.h \
+    radioreceiverfm.h
 
 LIBS += -L../../../CommonLibs/debug -lSystem -lMultimedia

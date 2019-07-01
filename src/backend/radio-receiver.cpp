@@ -63,20 +63,19 @@ const char* freqSyncMethodToString(FreqsyncMethod method)
     throw std::logic_error("Unhandled freqsyncMethod placement");
 }
 
-RadioReceiver::RadioReceiver(
-                RadioControllerInterface& rci,
-                InputInterface& input,
-                RadioReceiverOptions rro,
-                int transmission_mode) :
+RadioReceiver::RadioReceiver(RadioControllerInterface& rci,
+                             InputInterface& input,
+                             RadioReceiverOptions rro,
+                             int transmission_mode) :
     params(transmission_mode),
     mscHandler(params, false),
     ficHandler(rci),
     ofdmProcessor(input,
-        params,
-        rci,
-        mscHandler,
-        ficHandler,
-        rro)
+                  params,
+                  rci,
+                  mscHandler,
+                  ficHandler,
+                  rro)
 { }
 
 void RadioReceiver::restart(bool doScan)

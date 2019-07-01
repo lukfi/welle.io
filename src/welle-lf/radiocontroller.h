@@ -6,9 +6,10 @@
 #include "audio/audiobuffer.h"
 
 #include "dab-constants.h"
-#include "radio-receiver.h"
+//#include "radio-receiver.h"
 #include "ringbuffer.h"
 #include "channels.h"
+#include "radioreceiverfm.h"
 
 class RadioController : public RadioControllerInterface, public ProgrammeHandlerInterface
 {
@@ -77,7 +78,7 @@ private:
     Channels channels;
     RadioReceiverOptions rro;
 
-    std::unique_ptr<RadioReceiver> mRadioReceiver;
+    std::unique_ptr<RadioReceiverFM> mRadioReceiver;
     LF::audio::AudioBuffer* mAudioBuffer { nullptr };
 //    RingBuffer<int16_t> audioBuffer;
 //    CAudio mAudio;

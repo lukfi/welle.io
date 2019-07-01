@@ -169,7 +169,7 @@ void RadioController::setChannel(std::string Channel, bool isScan, bool Force)
         }
 
         // Restart demodulator and decoder
-        mRadioReceiver = std::make_unique<RadioReceiver>(*this, *mDevice, rro, 1);
+        mRadioReceiver = std::make_unique<RadioReceiverFM>(*this, *mDevice, rro, 1);
         mRadioReceiver->setReceiverOptions(rro);
         mRadioReceiver->restart(isScan);
 

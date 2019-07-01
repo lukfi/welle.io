@@ -44,13 +44,13 @@
 const char* fftPlacementMethodToString(FFTPlacementMethod fft_placement);
 const char* freqSyncMethodToString(FreqsyncMethod method);
 
-class RadioReceiver {
+class RadioReceiver
+{
     public:
-        RadioReceiver(
-                RadioControllerInterface& rci,
-                InputInterface& input,
-                RadioReceiverOptions rro,
-                int transmission_mode = 1);
+        RadioReceiver(RadioControllerInterface& rci,
+                      InputInterface& input,
+                      RadioReceiverOptions rro,
+                      int transmission_mode = 1);
 
         /* Restart the receiver, and specify if we want
          * to scan or receive. */
