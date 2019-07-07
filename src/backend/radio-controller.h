@@ -39,6 +39,10 @@
 #include <complex>
 #include "dab-constants.h"
 
+#ifdef WELLE_LF
+#include "threads/signals.h"
+#endif
+
 struct dab_date_time_t {
     int year = 0;
     int month = 0;
@@ -162,6 +166,8 @@ enum class DeviceParam {
     SoapySDRAntenna,
     SoapySDRDriverArgs,
     SoapySDRClockSource,
+    InputFreq,
+    AGC
 };
 
 /* Definition of the interface all input devices must implement */
@@ -175,6 +181,7 @@ public:
     virtual void stop(void) = 0;
     virtual void reset(void) = 0;
     virtual int32_t getSamples(DSPCOMPLEX* buffer, int32_t size) = 0;
+//    virtual int32_t getSamples(DSPFLOAT* buffer, int32_t size) { return 0; }
     virtual std::vector<DSPCOMPLEX> getSpectrumSamples(int size) = 0;
     virtual int32_t getSamplesToRead(void) = 0;
     virtual float setGain(int gain) = 0;
@@ -192,6 +199,10 @@ public:
         (void)param; (void)value;
         return false;
     }
+
+#ifdef WELLE_LF
+    Signal<void()> NEW_SAMPLES;
+#endif
 };
 
 #endif

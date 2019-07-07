@@ -2,9 +2,30 @@
 #define SOFTFM_FILTER_H
 
 #include <vector>
-#include "SoftFM.h"
+#include "dab-constants.h"
 
-class SampleBufferBlock;
+typedef DSPFLOAT Sample;
+typedef std::vector<DSPFLOAT> SampleVector;
+
+typedef std::complex<DSPFLOAT> IQSample;
+typedef std::vector<IQSample> IQSampleVector;
+
+inline void samples_mean_rms(const SampleVector& samples,
+                             double& mean, double& rms)
+{
+    Sample vsum = 0;
+    Sample vsumsq = 0;
+
+    unsigned int n = samples.size();
+    for (unsigned int i = 0; i < n; i++) {
+        Sample v = samples[i];
+        vsum   += v;
+        vsumsq += v * v;
+    }
+
+    mean = vsum / n;
+    rms  = sqrt(vsumsq / n);
+}
 
 /** Fine tuner which shifts the frequency of an IQ signal by a fixed offset. */
 class FineTuner
@@ -24,7 +45,8 @@ public:
 
     /** Process samples. */
     void process(const IQSampleVector& samples_in, IQSampleVector& samples_out);
-    void Process(const SampleBufferBlock* samples_in, IQSampleVector& samples_out);
+//    void Process(const SampleBufferBlock* samples_in, IQSampleVector& samples_out);
+    void Process(const DSPCOMPLEX* samples_in, int32_t size, IQSampleVector& samples_out);
 
 private:
     unsigned int    m_index;

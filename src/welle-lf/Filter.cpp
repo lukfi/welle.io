@@ -1,4 +1,3 @@
-
 #include <cassert>
 #include <cmath>
 #include <cstdint>
@@ -6,7 +5,6 @@
 #include <complex>
 
 #include "Filter.h"
-#include "RtlSdrSource.h"
 
 #include "utils/profiler.h"
 
@@ -89,7 +87,7 @@ void FineTuner::process(const IQSampleVector& samples_in,
 
     m_index = tblidx;
 }
-
+/*
 void FineTuner::Process(const SampleBufferBlock* samples_in, IQSampleVector& samples_out)
 {
     RTTIProfiler f("FineTuner::Process");
@@ -108,7 +106,24 @@ void FineTuner::Process(const SampleBufferBlock* samples_in, IQSampleVector& sam
 
     m_index = tblidx;
 }
+*/
+void FineTuner::Process(const DSPCOMPLEX* samples_in, int32_t size, IQSampleVector& samples_out)
+{
+    unsigned int tblidx = m_index;
+    auto tblsiz = m_table.size();
+    int32_t n = size;
 
+    samples_out.resize(n);
+
+    for (int32_t i = 0; i < n; i++) {
+        samples_out[i] = samples_in[i] * m_table[tblidx];
+        tblidx++;
+        if (tblidx == tblsiz)
+            tblidx = 0;
+    }
+
+    m_index = tblidx;
+}
 
 /* ****************  class LowPassFilterFirIQ  **************** */
 

@@ -4,7 +4,6 @@
 #include <cstdint>
 #include <vector>
 
-#include "SoftFM.h"
 #include "Filter.h"
 
 class SampleBufferBlock;
@@ -153,6 +152,7 @@ public:
      */
     void process(const IQSampleVector& samples_in, SampleVector& audio);
     void Process(const SampleBufferBlock* samples_in, SampleVector& audio);
+    void Process(const DSPCOMPLEX* samples_in, int32_t size, SampleVector& audio);
 
     /** Return true if a stereo signal is detected. */
     bool stereo_detected() const
@@ -272,6 +272,55 @@ private:
 
     bool mPrintStats { true };
     uint32_t mBlocks { 0 };
+};
+
+#include <thread>
+
+class InputInterface;
+
+class FmDecoderThreadWelle
+{
+public:
+    struct FmDecoderOptions
+    {
+        double mSample_rate_if;
+        double mTuning_offset;
+        double mSample_rate_pcm;
+        bool   mStereo = true;
+        double mDeemphasis = 50;
+        double mBandwidth_if = FmDecoder::default_bandwidth_if;
+        double mFreq_dev = FmDecoder::default_freq_dev;
+        double mBandwidth_pcm = FmDecoder::default_bandwidth_pcm;
+        unsigned int mDownsample = 1;
+    };
+
+    FmDecoderThreadWelle(InputInterface* inputInterface);
+    ~FmDecoderThreadWelle();
+
+    bool CreateDecoder(double sample_rate_if,
+                       double tuning_offset,
+                       double sample_rate_pcm,
+                       bool   stereo = true,
+                       double deemphasis = 50,
+                       double bandwidth_if = FmDecoder::default_bandwidth_if,
+                       double freq_dev = FmDecoder::default_freq_dev,
+                       double bandwidth_pcm = FmDecoder::default_bandwidth_pcm,
+                       unsigned int downsample = 1);
+
+    void Reset(bool doScan);
+    void Start(bool doScan);
+    void Stop();
+
+private:
+    void OnNewIQSamples();
+    void DecodeIQSamples();
+    LF::threads::IOThread mThread;
+
+    InputInterface* mInput { nullptr };
+    FmDecoder* mDecoder { nullptr };
+
+    std::atomic<bool> mRunning { false };
+
 };
 
 #endif

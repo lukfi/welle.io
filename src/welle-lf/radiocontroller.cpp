@@ -12,7 +12,7 @@
 #include "utils/assert.h"
 
 RadioController::RadioController() :
-    mThread("RadioControllerThread"),
+    mRadioControllerThread("RadioControllerThread"),
     labelTimer(40, LF::threads::TimerType::Periodic),
     stationTimer(1000, LF::threads::TimerType::Periodic),
     channelTimer(1000, LF::threads::TimerType::SingleShot)
@@ -24,15 +24,15 @@ RadioController::RadioController() :
     // Init timers
     //connect(&labelTimer, &QTimer::timeout, this, &CRadioController::labelTimerTimeout);
     CONNECT(labelTimer.TIMEOUT, RadioController, labelTimerTimeout);
-    mThread.SheduleTimer(&labelTimer);
+    mRadioControllerThread.SheduleTimer(&labelTimer);
 
     //connect(&stationTimer, &QTimer::timeout, this, &CRadioController::stationTimerTimeout);
     CONNECT(stationTimer.TIMEOUT, RadioController, stationTimerTimeout);
-    mThread.SheduleTimer(&stationTimer);
+    mRadioControllerThread.SheduleTimer(&stationTimer);
 
     //connect(&channelTimer, &QTimer::timeout, this, &CRadioController::channelTimerTimeout);
     CONNECT(channelTimer.TIMEOUT, RadioController, channelTimerTimeout);
-    mThread.SheduleTimer(&channelTimer);
+    mRadioControllerThread.SheduleTimer(&channelTimer);
 
     // Use the signal slot mechanism is necessary because the backend runs in a different thread
 //    connect(this, &CRadioController::switchToNextChannel,
@@ -47,10 +47,10 @@ RadioController::RadioController() :
 //    qRegisterMetaType<dab_date_time_t>("dab_date_time_t");
 //    connect(this, &CRadioController::dateTimeUpdated,
 //            this, &CRadioController::displayDateTime);
-    mThread.Start(true);
-    if (mThread.Running())
+    mRadioControllerThread.Start(true);
+    if (mRadioControllerThread.Running())
     {
-        SINFO("Started thread id: %d", mThread.GetId());
+        SINFO("Started thread id: %d", mRadioControllerThread.GetId());
     }
 }
 
@@ -70,7 +70,7 @@ void RadioController::CloseDevice()
 
 CDeviceID RadioController::OpenDevice()
 {
-    SCHEDULE_TASK(&mThread, &RadioController::OpenDeviceInternal, this);
+    SCHEDULE_TASK(&mRadioControllerThread, &RadioController::OpenDeviceInternal, this);
     if (mOpenDeviceEvent.Wait(3000))
     {
 //        SDEB("OpenDeviceInternal raised event");
@@ -82,7 +82,7 @@ CDeviceID RadioController::OpenDevice()
 
 void RadioController::play(std::string channel, std::string title, uint32_t service)
 {
-    EXECUTE_IN_THREAD(&mThread, &RadioController::play, this, channel, title, service);
+    EXECUTE_IN_THREAD(&mRadioControllerThread, &RadioController::play, this, channel, title, service);
     if (channel == "") {
         return;
     }
@@ -90,19 +90,75 @@ void RadioController::play(std::string channel, std::string title, uint32_t serv
     currentTitle = title;
 //    emit titleChanged();
 
-
-    SDEB("Play: %s %x on channel %d", title.c_str(), service, channel.c_str());
-
-    if (isChannelScan == true) {
-        stopScan();
+    if (mMode == RadioReceiverFM::Mode_t::FM)
+    {
+        ResetTechnicalData();
+        mMode = RadioReceiverFM::Mode_t::DVBT;
+        mDevice->setDeviceParam(DeviceParam::AGC, 0);
+        mDevice->setDeviceParam(DeviceParam::InputFreq, 2048000);
     }
 
+
+    SUCC("Play: %s %x on channel %d", title.c_str(), service, channel.c_str());
+
+    if (isChannelScan == true)
+    {
+        stopScan();
+    }
     DeviceRestart();
     setChannel(channel, false);
     setService(service);
 
 //    QSettings settings;
     //settings.setValue("lastchannel", QStringList() << serialise_serviceid(service) << channel);
+}
+
+void RadioController::playfm(int fmFreq)
+{
+    SDEB("playfm, th %d", LF::threads::GetThisThreadId());
+    EXECUTE_IN_THREAD(&mRadioControllerThread, &RadioController::playfm, this, fmFreq);
+
+    if (mMode == RadioReceiverFM::Mode_t::DVBT)
+    {
+        ResetTechnicalData();
+        mMode = RadioReceiverFM::Mode_t::FM;
+        mDevice->setDeviceParam(DeviceParam::AGC, 1);
+        mDevice->setDeviceParam(DeviceParam::InputFreq, 1.2e6);
+    }
+
+    if (isChannelScan == true)
+    {
+        stopScan();
+        channelTimer.Stop();
+    }
+
+    DeviceRestart();
+    if (mDevice && mDevice->getID() == CDeviceID::RAWFILE)
+    {
+        currentChannel = "File";
+        currentEId = 0;
+        currentEnsembleLabel = "";
+        currentFrequency = 0;
+    }
+    else
+    { // A real device
+        // Convert channel into a frequency
+        currentFrequency = fmFreq;
+
+        if(currentFrequency != 0 && mDevice)
+        {
+            SDEB("Tune to freq: %fMHz", currentFrequency / 1e6);
+            mDevice->setFrequency(currentFrequency);
+//            mDevice->setDeviceParam(DeviceParam::InputFreq, 1.2e6);
+            mDevice->reset(); // Clear buffer
+        }
+    }
+
+    // Restart demodulator and decoder
+    mRadioReceiver = nullptr;
+    mRadioReceiver = std::make_unique<RadioReceiverFM>(*this, mDevice.get(), rro, 1, RadioReceiverFM::Mode_t::FM);
+    mRadioReceiver->setReceiverOptions(rro);
+    mRadioReceiver->Start(RadioReceiverFM::Mode_t::FM, false);
 }
 
 void RadioController::stop()
@@ -119,6 +175,7 @@ void RadioController::stop()
 
 void RadioController::setService(uint32_t service, bool force)
 {
+    SDEB("setService");
     if (currentService != service or force) {
         currentService = service;
 //        emit stationChanged();
@@ -143,8 +200,8 @@ void RadioController::setService(uint32_t service, bool force)
 
 void RadioController::setChannel(std::string Channel, bool isScan, bool Force)
 {
-    SDEB("Set channel, th %d", LF::threads::GetThisThreadId());
-    EXECUTE_IN_THREAD(&mThread, &RadioController::setChannel, this, Channel, isScan, Force);
+    SDEB("setChannel, th %d", LF::threads::GetThisThreadId());
+    EXECUTE_IN_THREAD(&mRadioControllerThread, &RadioController::setChannel, this, Channel, isScan, Force);
 
     if (currentChannel != Channel || Force == true) {
         if (mDevice && mDevice->getID() == CDeviceID::RAWFILE) {
@@ -169,20 +226,27 @@ void RadioController::setChannel(std::string Channel, bool isScan, bool Force)
         }
 
         // Restart demodulator and decoder
-        mRadioReceiver = std::make_unique<RadioReceiverFM>(*this, *mDevice, rro, 1);
+        SERR("befor new receiver!!");
+        mRadioReceiver = nullptr;
+        mRadioReceiver = std::make_unique<RadioReceiverFM>(*this, mDevice.get(), rro, 1, RadioReceiverFM::Mode_t::DVBT);
+        SERR("new receiver!!");
         mRadioReceiver->setReceiverOptions(rro);
-        mRadioReceiver->restart(isScan);
+        mRadioReceiver->Start(RadioReceiverFM::Mode_t::DVBT, isScan);
 
 //        emit channelChanged();
 //        emit ensembleChanged();
 //        emit frequencyChanged();
+    }
+    else
+    {
+        SDEB("NOT");
     }
 }
 
 void RadioController::startScan()
 {
     SDEB("Start channel scan, th %d", LF::threads::GetThisThreadId());
-    EXECUTE_IN_THREAD(&mThread, &RadioController::startScan, this);
+    EXECUTE_IN_THREAD(&mRadioControllerThread, &RadioController::startScan, this);
 
     DeviceRestart();
 
@@ -271,6 +335,11 @@ void RadioController::selectFFTWindowPlacement(int fft_window_placement_ix)
     }
 }
 
+void RadioController::PrintMeasueres()
+{
+    SDEB("GAIN: %d", mDevice->getGain());
+}
+
 void RadioController::onFrameErrors(int frameErrors)
 {
     if (this->frameErrors == frameErrors)
@@ -327,7 +396,7 @@ void RadioController::onNewDynamicLabel(const std::string& label)
 
 void RadioController::onMOT(const std::vector<uint8_t>& data, int subtype)
 {
-    SDEB("On MOT!");
+//    SDEB("On MOT!");
 //    QByteArray qdata(reinterpret_cast<const char*>(Data.data()), static_cast<int>(Data.size()));
 //    motImage.loadFromData(qdata, subtype == 0 ? "GIF" : subtype == 1 ? "JPEG" : subtype == 2 ? "BMP" : "PNG");
 
@@ -379,23 +448,23 @@ void RadioController::onSignalPresence(bool isSignal)
     }
 
     if (isChannelScan)
-        SCHEDULE_TASK(&mThread, &RadioController::nextChannel, this, isSignal);
+        SCHEDULE_TASK(&mRadioControllerThread, &RadioController::nextChannel, this, isSignal);
 }
 
 void RadioController::onServiceDetected(uint32_t sId)
 {
     // you may not call radioReceiver->getService() because it internally holds the FIG mutex.
-    SCHEDULE_TASK(&mThread, &RadioController::serviceId, this, sId);
+    SCHEDULE_TASK(&mRadioControllerThread, &RadioController::serviceId, this, sId);
 }
 
 void RadioController::onNewEnsemble(uint16_t eId)
 {
-    SCHEDULE_TASK(&mThread, &RadioController::ensembleId, this, eId);
+    SCHEDULE_TASK(&mRadioControllerThread, &RadioController::ensembleId, this, eId);
 }
 
 void RadioController::onDateTimeUpdate(const dab_date_time_t& dateTime)
 {
-    SCHEDULE_TASK(&mThread, &RadioController::displayDateTime, this, dateTime);
+    SCHEDULE_TASK(&mRadioControllerThread, &RadioController::displayDateTime, this, dateTime);
 }
 
 void RadioController::onFIBDecodeSuccess(bool crcCheckOk, const uint8_t* fib)
@@ -539,6 +608,9 @@ void RadioController::DeviceRestart()
     if(mDevice) {
         isPlay = mDevice->restart();
     }
+    else {
+        SWAR("No device!");
+    }
 
     if(!isPlay) {
         SDEB("Radio device is not ready or does not exist.");
@@ -551,7 +623,7 @@ void RadioController::DeviceRestart()
 
 void RadioController::ensembleId(uint16_t eId)
 {
-    LF_ASSERT_THREAD(mThread);
+    LF_ASSERT_THREAD(mRadioControllerThread);
     SDEB("ID of ensemble: %d", eId);
 
     if (currentEId == eId)
@@ -567,7 +639,7 @@ void RadioController::ensembleId(uint16_t eId)
 
 void RadioController::serviceId(uint32_t sId)
 {
-    LF_ASSERT_THREAD(mThread);
+    LF_ASSERT_THREAD(mRadioControllerThread);
     if (isChannelScan == true) {
         stationCount++;
         currentText = LF::utils::sformat("Found channels: %d", stationCount);
@@ -675,7 +747,7 @@ void RadioController::channelTimerTimeout(LF::threads::SystemTimer*)
 
 void RadioController::nextChannel(bool isWait)
 {
-    LF_ASSERT_THREAD(mThread);
+    LF_ASSERT_THREAD(mRadioControllerThread);
 
     SINFO("Next channel");
 
@@ -703,7 +775,7 @@ void RadioController::nextChannel(bool isWait)
 
 void RadioController::displayDateTime(const dab_date_time_t& dateTime)
 {
-    LF_ASSERT_THREAD(mThread);
+    LF_ASSERT_THREAD(mRadioControllerThread);
 //    QDate Date;
 //    QTime Time;
 

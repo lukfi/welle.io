@@ -317,3 +317,11 @@ soapysdr {
     # The same lib for unix and Windows
     LIBS       += -lSoapySDR
 }
+
+
+#### LF ####
+CONFIG  += welle_lf
+welle_lf {
+    DEFINES     += WELLE_LF
+    INCLUDEPATH += $$PWD/../../Common/System
+}

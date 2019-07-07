@@ -93,7 +93,7 @@ class RadioReceiver
 
         DABParams& getParams(void);
 
-    private:
+    protected:
         bool playProgramme(ProgrammeHandlerInterface& handler,
                 const Service& s,
                 const std::string& dumpFileName,

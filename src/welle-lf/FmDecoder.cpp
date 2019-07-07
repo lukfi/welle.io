@@ -2,15 +2,16 @@
 #include <cassert>
 #include <cmath>
 
-#include "FmDecode.h"
-#include "fastatan2.h"
+#include "FmDecoder.h"
+#include "various/Xtan2.h"
 
 #include "utils/profiler.h"
 #include "utils/systemutils.h"
+#include "threads/threadutils.h"
 
 /********** DEBUG SETUP **********/
 #define ENABLE_SDEBUG
-#define DEBUG_PREFIX "RtlSdrSource: "
+#define DEBUG_PREFIX "FmDecoder: "
 #include "utils/singleton.h"
 #include "utils/screenlogger.h"
 /*********************************/
@@ -40,6 +41,48 @@ static IQSample::value_type rms_level_approx(const IQSampleVector& samples)
     return sqrt(level / n);
 }
 
+inline float fastatan2(float y, float x)
+{
+    const float n1 = 0.97239411f;
+    const float n2 = -0.19194795f;
+    const float pi = (float)(M_PI);
+    const float pi_2 = pi/2.0f;
+    float result = 0.0f;
+    if (x != 0.0f)
+    {
+        const union { float flVal; uint32_t nVal; } tYSign = { y };
+        const union { float flVal; uint32_t nVal; } tXSign = { x };
+        if (fabsf(x) >= fabsf(y))
+        {
+            union { float flVal; uint32_t nVal; } tOffset = { pi };
+            // Add or subtract PI based on y's sign.
+            tOffset.nVal |= tYSign.nVal & 0x80000000u;
+            // No offset if x is positive, so multiply by 0 or based on x's sign.
+            tOffset.nVal *= tXSign.nVal >> 31;
+            result = tOffset.flVal;
+            const float z = y / x;
+            result += (n1 + n2 * z * z) * z;
+        }
+        else // Use atan(y/x) = pi/2 - atan(x/y) if |y/x| > 1.
+        {
+            union { float flVal; uint32_t nVal; } tOffset = { pi_2 };
+            // Add or subtract PI/2 based on y's sign.
+            tOffset.nVal |= tYSign.nVal & 0x80000000u;
+            result = tOffset.flVal;
+            const float z = x / y;
+            result -= (n1 + n2 * z * z) * z;
+        }
+    }
+    else if (y > 0.0f)
+    {
+        result = pi_2;
+    }
+    else if (y < 0.0f)
+    {
+        result = -pi_2;
+    }
+    return result;
+}
 
 /* ****************  class PhaseDiscriminator  **************** */
 
@@ -62,11 +105,14 @@ void PhaseDiscriminator::process(const IQSampleVector& samples_in,
         IQSample s1(samples_in[i]);
         IQSample d(conj(s0) * s1);
 // TODO : implement fast approximation of atan2
-#if 1
+#if 0
         // using fast approximation
-        Sample w = static_cast<Sample>(fastatan2(static_cast<float>(d.imag()), static_cast<float>(d.real())));
+        compAtan atan;
+        Sample w = atan.atan2(static_cast<float>(d.imag()), static_cast<float>(d.real()));
+//        Sample w = static_cast<Sample>(fastatan2(static_cast<float>(d.imag()), static_cast<float>(d.real())));
 #else
-        Sample w = atan2(d.imag(), d.real());
+//        Sample w = atan2(d.imag(), d.real());
+        Sample w = fastatan2(d.imag(), d.real());
 #endif
         samples_out[i] = w * m_freq_scale_factor;
         s0 = s1;
@@ -315,7 +361,6 @@ FmDecoder::FmDecoder(double sample_rate_if,
     // nothing more to do
 }
 
-
 void FmDecoder::process(const IQSampleVector& samples_in, SampleVector& audio)
 {
     // Fine tuning.
@@ -396,7 +441,84 @@ void FmDecoder::Process(const SampleBufferBlock* samples_in, SampleVector& audio
 {
     RTTIProfiler f1("FmDecoder::Process");
     // Fine tuning.
-    m_finetuner.Process(samples_in, m_buf_iftuned);
+//    m_finetuner.Process(samples_in, m_buf_iftuned); // LF# temporary
+
+    // Low pass filter to isolate station.
+    m_iffilter.process(m_buf_iftuned, m_buf_iffiltered);
+
+    // Measure IF level.
+    double if_rms = rms_level_approx(m_buf_iffiltered);
+    m_if_level = 0.95 * m_if_level + 0.05 * if_rms;
+
+    // Extract carrier frequency.
+    m_phasedisc.process(m_buf_iffiltered, m_buf_baseband);
+
+    // Downsample baseband signal to reduce processing.
+    if (m_downsample > 1) {
+        SampleVector tmp(move(m_buf_baseband));
+        m_resample_baseband.process(tmp, m_buf_baseband);
+    }
+
+    // Measure baseband level.
+    double baseband_mean, baseband_rms;
+    samples_mean_rms(m_buf_baseband, baseband_mean, baseband_rms);
+    m_baseband_mean  = 0.95 * m_baseband_mean + 0.05 * baseband_mean;
+    m_baseband_level = 0.95 * m_baseband_level + 0.05 * baseband_rms;
+
+    // Extract mono audio signal.
+    m_resample_mono.process(m_buf_baseband, m_buf_mono);
+
+    // DC blocking
+    m_dcblock_mono.process_inplace(m_buf_mono);
+
+    if (m_stereo_enabled) {
+
+        // Lock on stereo pilot.
+        m_pilotpll.process(m_buf_baseband, m_buf_rawstereo);
+        m_stereo_detected = m_pilotpll.locked();
+
+        // Demodulate stereo signal.
+        demod_stereo(m_buf_baseband, m_buf_rawstereo);
+
+        // Extract audio and downsample.
+        // NOTE: This MUST be done even if no stereo signal is detected yet,
+        // because the downsamplers for mono and stereo signal must be
+        // kept in sync.
+        m_resample_stereo.process(m_buf_rawstereo, m_buf_stereo);
+
+        // DC blocking
+        m_dcblock_stereo.process_inplace(m_buf_stereo);
+
+        if (m_stereo_detected) {
+            // Extract left/right channels from (L+R) / (L-R) signals.
+            stereo_to_left_right(m_buf_mono, m_buf_stereo, audio);
+            // Stereo deemphasis to L and R
+            m_deemph_stereo.process_inplace(audio);
+
+        } else {
+
+            // Mono deemphasis
+            m_deemph_mono.process_inplace(m_buf_mono);
+            // Duplicate mono signal in left/right channels.
+            mono_to_left_right(m_buf_mono, audio);
+
+        }
+
+    } else {
+
+        // Mono deemphasis
+        m_deemph_mono.process_inplace(m_buf_mono);
+        // Just return mono channel.
+        audio = move(m_buf_mono);
+
+    }
+}
+
+void FmDecoder::Process(const DSPCOMPLEX* samples_in, int32_t size, SampleVector& audio)
+{
+    RTTIProfiler f1("FmDecoder::Process");
+    // Fine tuning.
+    m_finetuner.Process(samples_in, size, m_buf_iftuned);
 
     // Low pass filter to isolate station.
     m_iffilter.process(m_buf_iftuned, m_buf_iffiltered);
@@ -521,15 +643,12 @@ void FmDecoder::stereo_to_left_right(const SampleVector& samples_mono,
 
 /* end */
 
-#include "RtlSdrSource.h"
-#include "AudioOutput.h"
-
 FmDecoderThread::FmDecoderThread(RtlSdrSource* src, AudioOutput* output) :
     mSource(src),
     mAudioOutput(output)
 {
     mThread.Start();
-    CONNECT(mSource->NEW_DATA, FmDecoderThread, OnNewIQSamples, this);
+//    CONNECT(mSource->NEW_DATA, FmDecoderThread, OnNewIQSamples, this);
 }
 
 bool FmDecoderThread::CreateDecoder(double sample_rate_if,
@@ -569,7 +688,6 @@ FmDecoderThread::~FmDecoderThread()
 void FmDecoderThread::OnNewIQSamples(RtlSdrSource*)
 {
     SCHEDULE_TASK(&mThread, &FmDecoderThread::DecodeIQSamples, this);
-
 }
 
 void FmDecoderThread::DecodeIQSamples()
@@ -577,31 +695,138 @@ void FmDecoderThread::DecodeIQSamples()
     RTTIProfiler f("FmDecoderThread::DecodeIQSamples");
     if (mDecoder)
     {
-        SampleBufferBlock* block = mSource->GetBlockToRead();
-        if (block)
-        {
-            ++mBlocks;
+//        SampleBufferBlock* block = mSource->GetBlockToRead();
+//        if (block)
+//        {
+//            ++mBlocks;
 
-            SampleVector audio;
-            mDecoder->Process(block, audio);
-            mSource->UpdateReadState();
-            mAudioOutput->write(audio);
-            if (mPrintStats)
-            {
-                PRINT("\rblk=%6d  freq=%8.4fMHz  IF=%+5.1fdB  BB=%+5.1fdB  ",
-                      mBlocks,
-                      (mSource->get_frequency() + mDecoder->get_tuning_offset()) * 1.0e-6,
-                      20 * log10(mDecoder->get_if_level()),
-                      20 * log10(mDecoder->get_baseband_level()) + 3.01);
-                if (mDecoder->stereo_detected())
-                {
-                    PRINT("stereo (level: %.4f)", mDecoder->get_pilot_level());
-                }
-                else
-                {
-                    PRINT("                      ");
-                }
-            }
-        }
+//            SampleVector audio;
+//            mDecoder->Process(block, audio);
+//            mSource->UpdateReadState();
+//            mAudioOutput->write(audio);
+//            if (mPrintStats)
+//            {
+//                PRINT("\rblk=%6d  freq=%8.4fMHz  IF=%+5.1fdB  BB=%+5.1fdB  ",
+//                      mBlocks,
+//                      (mSource->get_frequency() + mDecoder->get_tuning_offset()) * 1.0e-6,
+//                      20 * log10(mDecoder->get_if_level()),
+//                      20 * log10(mDecoder->get_baseband_level()) + 3.01);
+//                if (mDecoder->stereo_detected())
+//                {
+//                    PRINT("stereo (level: %.4f)", mDecoder->get_pilot_level());
+//                }
+//                else
+//                {
+//                    PRINT("                      ");
+//                }
+//            }
+//        }
     }
 }
+
+#include "virtual_input.h"
+
+FmDecoderThreadWelle::FmDecoderThreadWelle(InputInterface* inputInterface) :
+    mThread("FmDecoder thread"),
+    mInput(inputInterface)
+{
+    CONNECT(mInput->NEW_SAMPLES, FmDecoderThreadWelle, OnNewIQSamples, this);
+    mRunning = false;
+}
+
+FmDecoderThreadWelle::~FmDecoderThreadWelle()
+{
+    DISCONNECT(mInput->NEW_SAMPLES, FmDecoderThreadWelle, OnNewIQSamples, this);
+}
+
+bool FmDecoderThreadWelle::CreateDecoder(double sample_rate_if,
+                                         double tuning_offset,
+                                         double sample_rate_pcm,
+                                         bool stereo,
+                                         double deemphasis,
+                                         double bandwidth_if,
+                                         double freq_dev,
+                                         double bandwidth_pcm,
+                                         unsigned int downsample)
+{
+    bool ret = false;
+
+    if (mDecoder == nullptr)
+    {
+        mDecoder = new FmDecoder(sample_rate_if,
+                                 tuning_offset,
+                                 sample_rate_pcm,
+                                 stereo,
+                                 deemphasis,
+                                 bandwidth_if,
+                                 freq_dev,
+                                 bandwidth_pcm,
+                                 downsample);
+        ret = true;
+    }
+
+    return ret;
+}
+
+void FmDecoderThreadWelle::Reset(bool doScan)
+{
+    Stop();
+    Start(doScan);
+}
+
+void FmDecoderThreadWelle::Start(bool doScan)
+{
+    SERR("!!!");
+    if (!mRunning)
+    {
+        mInput->restart();
+        mThread.Start();
+        mRunning = true;
+    }
+}
+
+void FmDecoderThreadWelle::Stop()
+{
+    if (mRunning)
+    {
+        SDEB("Stopping FMDecoder %d %d", LF::threads::GetThisThreadId(), mThread.GetId());
+        mThread.Stop();
+        mRunning = false;
+    }
+}
+
+void FmDecoderThreadWelle::OnNewIQSamples()
+{
+//    SDEB("@@@");
+    if (mRunning == true)
+    {
+        SCHEDULE_TASK(&mThread, &FmDecoderThreadWelle::DecodeIQSamples, this);
+    }
+}
+
+void FmDecoderThreadWelle::DecodeIQSamples()
+{
+//    SDEB("+++");
+    int32_t samples = mInput->getSamplesToRead();
+    while (samples)
+    {
+//        SDEB("S %d", samples);
+        std::vector<DSPCOMPLEX> buf;
+        buf.resize(samples);
+        auto size = mInput->getSamples(buf.data(), samples);
+        if (samples != size)
+        {
+//            SWAR("Wrong number of samples read: %d, expected %d", size, samples);
+        }
+
+        if (mDecoder)
+        {
+            SampleVector audio;
+//            mDecoder->Process(buf.data(), size, audio);
+            //mAudioOutput->write(audio);
+        }
+        samples = 2 * mInput->getSamplesToRead();
+    }
+//    SDEB("---");
+}
+

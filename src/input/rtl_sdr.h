@@ -37,6 +37,7 @@
 #include <thread>
 #include <string>
 #include <atomic>
+#include <mutex>
 #include <rtl-sdr.h>
 
 #include "virtual_input.h"
@@ -59,6 +60,7 @@ public:
     void stop(void);
     void reset(void);
     int32_t getSamples(DSPCOMPLEX *buffer, int32_t size);
+//    int32_t getSamples(DSPFLOAT* buffer, int32_t size);
     std::vector<DSPCOMPLEX> getSpectrumSamples(int size);
     int32_t getSamplesToRead(void);
     void setFrequency(int Frequency);
@@ -73,6 +75,7 @@ public:
     CDeviceID getID(void);
 
 private:
+    std::mutex mRtlSdrMutex;
     std::thread agcThread;
     RadioControllerInterface& radioController;
     int lastFrequency = kHz(94700);

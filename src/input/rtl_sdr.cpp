@@ -35,6 +35,10 @@
 
 #include "rtl_sdr.h"
 
+#define ENABLE_SDEBUG
+#define DEBUG_PREFIX "CRTL_SDR: "
+#include "utils/screenlogger.h"
+
 #define READLEN_DEFAULT 8192
 
 // Fallback if function is not defined in shared lib
@@ -76,10 +80,16 @@ CRTL_SDR::CRTL_SDR(RadioControllerInterface& radioController) :
     open = true;
 
     // Set sample rate
-    ret = rtlsdr_set_sample_rate(device, INPUT_RATE);
+    {
+        std::lock_guard<std::mutex> lock(mRtlSdrMutex);
+        ret = rtlsdr_set_sample_rate(device, INPUT_RATE);
+    }
     if (ret < 0) {
-        std::clog << "RTL_SDR:" << " Setting sample rate failed" << std::endl;
+        SERR(" Setting sample rate failed. err: %d", ret);
         throw 0;
+    }
+    else {
+       SDEB(" Set sample rate: %d", rtlsdr_get_sample_rate(device));
     }
 
     // Get tuner gains
@@ -93,7 +103,10 @@ CRTL_SDR::CRTL_SDR(RadioControllerInterface& radioController) :
     }
 
     // Always use manual gain, the AGC is implemented in software
-    rtlsdr_set_tuner_gain_mode(device, 1);
+    {
+        std::lock_guard<std::mutex> lock(mRtlSdrMutex);
+        rtlsdr_set_tuner_gain_mode(device, 1);
+    }
 
     // Enable AGC by default
     setAgc(true);
@@ -112,7 +125,12 @@ CRTL_SDR::~CRTL_SDR(void)
 void CRTL_SDR::setFrequency(int frequency)
 {
     lastFrequency = frequency;
-    (void)(rtlsdr_set_center_freq(device, frequency + frequencyOffset));
+    int ret = -1;
+    {
+        std::lock_guard<std::mutex> lock(mRtlSdrMutex);
+        ret = rtlsdr_set_center_freq(device, frequency + frequencyOffset);
+    }
+    SDEB("Freq set: %d == %d %s(%d)", frequency + frequencyOffset, rtlsdr_get_center_freq(device), (ret == 0) ? "OK" : "FAIL", ret);
 }
 
 int CRTL_SDR::getFrequency(void) const
@@ -138,7 +156,11 @@ bool CRTL_SDR::restart(void)
     if (ret < 0)
         return false;
 
-    rtlsdr_set_center_freq(device, lastFrequency + frequencyOffset);
+    SDEB("Set central freq: %d", lastFrequency + frequencyOffset);
+    {
+        std::lock_guard<std::mutex> lock(mRtlSdrMutex);
+        rtlsdr_set_center_freq(device, lastFrequency + frequencyOffset);
+    }
     rtlsdrRunning = true;
 
     rtlsdrThread = std::thread(&CRTL_SDR::rtlsdr_read_async_wrapper, this);
@@ -171,6 +193,13 @@ void CRTL_SDR::stop(void)
 
 float CRTL_SDR::getGain() const
 {
+    // LF# temp
+    SDEB("tuner gain %d", rtlsdr_get_tuner_gain(device));
+    SDEB("center freq %d", rtlsdr_get_center_freq(device));
+    SDEB("sample rate %d", rtlsdr_get_sample_rate(device));
+    SDEB("offset tuning %d", rtlsdr_get_offset_tuning(device));
+    SDEB("direct sampling %d", rtlsdr_get_direct_sampling(device));
+    SDEB("freq correction %d", rtlsdr_get_freq_correction(device));
     return currentGain / 10.0;
 }
 
@@ -184,11 +213,16 @@ float CRTL_SDR::setGain(int gain_index)
     currentGainIndex = gain_index;
     currentGain = gains[gain_index];
 
-    //std::clog << "RTL_SDR:" << "Set gain to" << currentGain / 10.0 << "db" << std::endl;
-
-    int ret = rtlsdr_set_tuner_gain(device, currentGain);
+    int ret = -1;
+    {
+        std::lock_guard<std::mutex> lock(mRtlSdrMutex);
+        ret = rtlsdr_set_tuner_gain(device, currentGain);
+    }
     if (ret != 0) {
-        std::clog << "RTL_SDR:" << "Setting gain failed" << std::endl;
+        SERR("Setting gain failed. err: %d", ret);
+    }
+    else {
+        SDEB("Gain set to: %.2f dm", currentGain / 10.0);
     }
 
     return currentGain / 10.0;
@@ -212,11 +246,13 @@ void CRTL_SDR::setAgc(bool AGC)
 
 bool CRTL_SDR::setDeviceParam(DeviceParam param, int value)
 {
-    switch(param) {
-        case DeviceParam::BiasTee:
+    switch(param)
+    {
+    case DeviceParam::BiasTee:
         if(rtlsdr_set_bias_tee)
         {
             std::clog << "RTL_SDR: Set bias tee to " << value << std::endl;
+            std::lock_guard<std::mutex> lock(mRtlSdrMutex);
             rtlsdr_set_bias_tee(device, value);
         }
         else
@@ -224,8 +260,50 @@ bool CRTL_SDR::setDeviceParam(DeviceParam param, int value)
             std::clog << "RTL_SDR: " << "Error: rtlsdr_set_bias_tee() not defined!" << std::endl;
         }
         return true;
-
-        default: std::runtime_error("Unsupported device parameter");
+    case DeviceParam::InputFreq:
+    {
+        if (rtlsdr_get_sample_rate(device) != value)
+        {
+            int ret = -1;
+            {
+                std::lock_guard<std::mutex> lock(mRtlSdrMutex);
+                ret = rtlsdr_set_sample_rate(device, value);
+            }
+            if (ret < 0) {
+                SERR(" Setting sample rate failed. err: %d", ret);
+                throw 0;
+            }
+            else {
+               SDEB(" Set sample rate: %d", rtlsdr_get_sample_rate(device));
+            }
+        }
+        return true;
+    }
+    case DeviceParam::AGC:
+    {
+        if (value == 0)
+        {
+            SDEB("Manual AGC");
+            {
+                std::lock_guard<std::mutex> lock(mRtlSdrMutex);
+                rtlsdr_set_tuner_gain_mode(device, 1);
+            }
+            //setGain(0);
+            setAgc(true);
+        }
+        else
+        {
+            SDEB("Automatic AGC");
+            isAGC = false;
+            {
+                std::lock_guard<std::mutex> lock(mRtlSdrMutex);
+                rtlsdr_set_tuner_gain_mode(device, 0);
+            }
+        }
+        return true;
+    }
+    default:
+        std::runtime_error("Unsupported device parameter");
     }
 
     return false;
@@ -286,11 +364,13 @@ void CRTL_SDR::AGCTimer(void)
             }
         }
         else { // AGC is off
+            /*
             if (minAmplitude == 0 || maxAmplitude == 255) {
                 std::string Text = "ADC overload. Maybe you are using a to high gain.";
                 std::clog << "RTL_SDR:" << Text << std::endl;
                 radioController.onMessage(message_level_t::Information, Text);
             }
+            */
         }
     }
 }
@@ -310,6 +390,19 @@ int32_t CRTL_SDR::getSamples(DSPCOMPLEX *buffer, int32_t size)
 
     return amount / 2;
 }
+
+//int32_t CRTL_SDR::getSamples(DSPFLOAT* buffer, int32_t size)
+//{
+//    int32_t amount = sampleBuffer.getDataFromBuffer(buffer, size);
+
+//    // Normalise samples
+//    for (int i = 0; i < amount / 2; i++) {
+//        buffer[2 * i]     = (DSPFLOAT(buffer[2 * i] - 128)) / 128.0f;
+//        buffer[2 * i + 1] = (DSPFLOAT(buffer[2 * i + 1] - 128)) / 128.0f;
+//    }
+
+//    return amount;
+//}
 
 std::vector<DSPCOMPLEX> CRTL_SDR::getSpectrumSamples(int size)
 {
@@ -369,6 +462,10 @@ void CRTL_SDR::RTLSDRCallBack(uint8_t* buf, uint32_t len, void* ctx)
             if (rtlsdr->maxAmplitude < buf[i])
                 rtlsdr->maxAmplitude = buf[i];
         }
+#ifdef WELLE_LF
+        //if (rtlsdr->sampleBuffer.GetRingBufferReadAvailable() >= 262144) // LF# ?
+            rtlsdr->NEW_SAMPLES.Emit();
+#endif
     }
     else {
         std::clog << "ERROR no ctx in RTLSDR callback" << std::endl;

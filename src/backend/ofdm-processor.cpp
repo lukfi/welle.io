@@ -50,6 +50,12 @@
   * to the interpreters for FIC and MSC
   */
 
+/********** DEBUG SETUP **********/
+#define ENABLE_SDEBUG
+#define DEBUG_PREFIX "OFDMProcessor: "
+#include "utils/singleton.h"
+#include "utils/screenlogger.h"
+/*********************************/
 
 OFDMProcessor::OFDMProcessor(
         InputInterface& inputInterface,
@@ -122,7 +128,7 @@ void OFDMProcessor::start()
     syncBufferIndex    = 0;
     sLevel             = 0;
     localPhase         = 0;
-    input.restart();
+    input.restart(); // LF#
     running            = true;
     threadHandle       = std::thread(&OFDMProcessor::run, this);
 }
@@ -292,7 +298,7 @@ notSynced:
             counter ++;
             if (counter > T_F) { // hopeless
                 //           fprintf (stderr, "%f %f\n", currentStrength / 50, sLevel);
-                std::clog << "ofdm-processor: " << "SyncOnNull failed" << std::endl;
+                SDEB("SyncOnNull failed");
                 goto notSynced;
             }
         }
@@ -313,7 +319,7 @@ notSynced:
             counter   ++;
             //
             if (counter > T_null + 50) { // hopeless
-                std::clog << "ofdm-processor: " << "SyncOnEndNull failed" << std::endl;
+                SDEB("SyncOnEndNull failed");
                 goto notSynced;
             }
         }
@@ -345,7 +351,7 @@ SyncOnPhase:
         impulseResponseBuffer.clear();
 
         if (startIndex < 0) { // no sync, try again
-            std::clog << "ofdm-processor: " << "SyncOnPhase failed" << std::endl;
+            SDEB("SyncOnPhase failed");
             goto notSynced;
         }
         if (scanMode) {
@@ -390,7 +396,9 @@ SyncOnPhase:
         //  be off.
         if (!disableCoarseCorrector and ficHandler.getFicDecodeRatioPercent() < 50) {
             if (!coarseSyncCounter) {
-                std::clog << "ofdm-processor: " << "Lost coarse sync (coarseCorrector: " << lastValidCoarseCorrector << "; fineCorrector: " <<  lastValidFineCorrector << ")" << std::endl;
+                std::stringstream ss;
+                ss << "ofdm-processor: " << "Lost coarse sync (coarseCorrector: " << lastValidCoarseCorrector << "; fineCorrector: " <<  lastValidFineCorrector << ")";
+                SDEB(ss.str().c_str());
             }
 
             coarseSyncCounter++;
@@ -504,7 +512,10 @@ void OFDMProcessor::reset()
 
 void OFDMProcessor::stop()
 {
-    running = false;
+    if (running) {
+        running = false;
+        threadHandle.join();
+    }
 }
 
 void OFDMProcessor::resetCoarseCorrector()

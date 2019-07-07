@@ -22,6 +22,7 @@ public:
 //    void setDeviceParam(std::string param, int value);
 //    void setDeviceParam(std::string param, std::string value);
     void play(std::string channel, std::string title, uint32_t service);
+    void playfm(int fmFreq);
 //    void pause();
     void stop();
     void setService(uint32_t service, bool force = false);
@@ -42,6 +43,7 @@ public:
 //    DABParams& getParams(void);
 //    int getCurrentFrequency();
 
+    void PrintMeasueres();
     void SetBuffer(LF::audio::AudioBuffer* audioBuffer) { mAudioBuffer = audioBuffer; }
 public:
     //called from the backend
@@ -124,7 +126,7 @@ private:
     std::string deviceName = "Unknown";
     CDeviceID deviceId = CDeviceID::UNKNOWN;
 
-    LF::threads::IOThread mThread;
+    LF::threads::IOThread mRadioControllerThread;
     LF::threads::SystemTimer labelTimer;
     LF::threads::SystemTimer stationTimer;
     LF::threads::SystemTimer channelTimer;
@@ -136,6 +138,8 @@ private:
     bool isAutoPlay = false;
     std::string autoChannel;
     uint32_t autoService;
+
+    RadioReceiverFM::Mode_t mMode { RadioReceiverFM::Mode_t::DVBT };
 
 //public slots:
 //    void setErrorMessage(QString Text);

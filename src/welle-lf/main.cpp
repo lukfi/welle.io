@@ -25,7 +25,7 @@ int main()
     rc.SetBuffer(&buffer);
     rc.OpenDevice();
     rc.setAGC(true);
-    rc.startScan();
+//    rc.startScan();
 
     std::string line;
     while (true)
@@ -34,6 +34,26 @@ int main()
         if (line == "play")
         {
             rc.play("11B", "trójka", 0x3233);
+        }
+        else if (line == "play2")
+        {
+            rc.play("11B", "radio kraków", 0x37fc);
+        }
+        else if (line == "fm")
+        {
+            rc.playfm(96000000);
+        }
+        else if (line == "fm2")
+        {
+            rc.playfm(101000000);
+        }
+        else if (line == "scan")
+        {
+            rc.startScan();
+        }
+        else if (line == "m")
+        {
+            rc.PrintMeasueres();
         }
         else
         {
