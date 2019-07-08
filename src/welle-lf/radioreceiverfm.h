@@ -4,6 +4,8 @@
 #include "radio-receiver.h"
 #include "FmDecoder.h"
 
+#define INPUT_FM_RATE (1.2e6)
+#define PCM_RATE (48000)
 
 class RadioReceiverFM : public RadioReceiver
 {

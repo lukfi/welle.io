@@ -292,7 +292,7 @@ public:
         double mBandwidth_if = FmDecoder::default_bandwidth_if;
         double mFreq_dev = FmDecoder::default_freq_dev;
         double mBandwidth_pcm = FmDecoder::default_bandwidth_pcm;
-        unsigned int mDownsample = 1;
+//        unsigned int mDownsample = 1; always calculate
     };
 
     FmDecoderThreadWelle(InputInterface* inputInterface, ProgrammeHandlerInterface* output);

@@ -140,6 +140,7 @@ private:
     uint32_t autoService;
 
     RadioReceiverFM::Mode_t mMode { RadioReceiverFM::Mode_t::DVBT };
+    double mFmTunerFreq { 0 };
 
 //public slots:
 //    void setErrorMessage(QString Text);

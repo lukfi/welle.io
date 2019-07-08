@@ -18,20 +18,34 @@ RadioReceiverFM::RadioReceiverFM(RadioControllerInterface& rci,
     if (mode == Mode_t::FM)
     {
         mFmDecoder = new FmDecoderThreadWelle(mInput, &output);
-        FmDecoderThreadWelle::FmDecoderOptions options;
 
-        double ifrate = 1.2e6;
-        unsigned int downsample = std::max(1, int(ifrate / 215.0e3));
-
-        mFmDecoder->CreateDecoder(ifrate,
-                                  -300000,
-                                  48000,
-                                  true,
-                                  50,
-                                  100000,
-                                  75000,
-                                  15000,
-                                  downsample);
+        if (fmOptions)
+        {
+            unsigned int downsample = std::max(1, int(fmOptions->mSample_rate_if / 215.0e3));
+            mFmDecoder->CreateDecoder(fmOptions->mSample_rate_if,  // sample_rate_if
+                                      fmOptions->mTuning_offset,   // tuning_offset
+                                      fmOptions->mSample_rate_pcm, // sample_rate_pcm
+                                      fmOptions->mStereo,          // stereo
+                                      fmOptions->mDeemphasis,      // deemphasis,
+                                      fmOptions->mBandwidth_if,    // bandwidth_if
+                                      fmOptions->mFreq_dev,        // freq_dev
+                                      fmOptions->mBandwidth_pcm,   // bandwidth_pcm
+                                      downsample);
+        }
+        else // some wrong defaults
+        {
+            unsigned int downsample = std::max(1, int(INPUT_FM_RATE / 215.0e3));
+            double offset = -1.0 * (0.25 * INPUT_FM_RATE);
+            mFmDecoder->CreateDecoder(INPUT_FM_RATE,                     // sample_rate_if
+                                      offset,                            // tuning_offset
+                                      PCM_RATE,                          // sample_rate_pcm
+                                      true,                              // stereo
+                                      50,                                // deemphasis,
+                                      FmDecoder::default_bandwidth_if,   // bandwidth_if
+                                      FmDecoder::default_freq_dev,       // freq_dev
+                                      FmDecoder::default_bandwidth_pcm,  // bandwidth_pcm
+                                      downsample);
+        }
     }
 }
 
