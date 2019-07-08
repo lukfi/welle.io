@@ -93,6 +93,7 @@ void RadioController::play(std::string channel, std::string title, uint32_t serv
     if (mMode == RadioReceiverFM::Mode_t::FM)
     {
         ResetTechnicalData();
+        mRadioReceiver = nullptr;
         mMode = RadioReceiverFM::Mode_t::DVBT;
         mDevice->setDeviceParam(DeviceParam::AGC, 0);
         mDevice->setDeviceParam(DeviceParam::InputFreq, 2048000);
@@ -121,6 +122,7 @@ void RadioController::playfm(int fmFreq)
     if (mMode == RadioReceiverFM::Mode_t::DVBT)
     {
         ResetTechnicalData();
+        mRadioReceiver = nullptr;
         mMode = RadioReceiverFM::Mode_t::FM;
         mDevice->setDeviceParam(DeviceParam::AGC, 1);
         mDevice->setDeviceParam(DeviceParam::InputFreq, 1.2e6);
@@ -155,8 +157,9 @@ void RadioController::playfm(int fmFreq)
     }
 
     // Restart demodulator and decoder
-    mRadioReceiver = nullptr;
-    mRadioReceiver = std::make_unique<RadioReceiverFM>(*this, mDevice.get(), rro, 1, RadioReceiverFM::Mode_t::FM);
+//    mRadioReceiver = nullptr;
+    mRadioReceiver = std::make_unique<RadioReceiverFM>(*this,*this , mDevice.get(), rro, 1, RadioReceiverFM::Mode_t::FM);
+    SINFO("new receiver!!");
     mRadioReceiver->setReceiverOptions(rro);
     mRadioReceiver->Start(RadioReceiverFM::Mode_t::FM, false);
 }
@@ -226,10 +229,9 @@ void RadioController::setChannel(std::string Channel, bool isScan, bool Force)
         }
 
         // Restart demodulator and decoder
-        SERR("befor new receiver!!");
-        mRadioReceiver = nullptr;
-        mRadioReceiver = std::make_unique<RadioReceiverFM>(*this, mDevice.get(), rro, 1, RadioReceiverFM::Mode_t::DVBT);
-        SERR("new receiver!!");
+//        mRadioReceiver = nullptr;
+        mRadioReceiver = std::make_unique<RadioReceiverFM>(*this, *this, mDevice.get(), rro, 1, RadioReceiverFM::Mode_t::DVBT);
+        SINFO("new receiver!!");
         mRadioReceiver->setReceiverOptions(rro);
         mRadioReceiver->Start(RadioReceiverFM::Mode_t::DVBT, isScan);
 

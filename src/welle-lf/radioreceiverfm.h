@@ -15,6 +15,7 @@ public:
     };
 
     RadioReceiverFM(RadioControllerInterface& rci,
+                    ProgrammeHandlerInterface& output,
                     InputInterface* input,
                     RadioReceiverOptions rro,
                     int transmission_mode,// = 1,

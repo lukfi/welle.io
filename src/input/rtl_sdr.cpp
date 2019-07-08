@@ -39,7 +39,8 @@
 #define DEBUG_PREFIX "CRTL_SDR: "
 #include "utils/screenlogger.h"
 
-#define READLEN_DEFAULT 8192
+//#define READLEN_DEFAULT 8192
+#define READLEN_DEFAULT (16 * 32 * 512) // LF#
 
 // Fallback if function is not defined in shared lib
 int __attribute__((weak)) rtlsdr_set_bias_tee(rtlsdr_dev_t *dev, int on);
@@ -463,7 +464,7 @@ void CRTL_SDR::RTLSDRCallBack(uint8_t* buf, uint32_t len, void* ctx)
                 rtlsdr->maxAmplitude = buf[i];
         }
 #ifdef WELLE_LF
-        //if (rtlsdr->sampleBuffer.GetRingBufferReadAvailable() >= 262144) // LF# ?
+//        if (rtlsdr->sampleBuffer.GetRingBufferReadAvailable() >= 262144) // LF# ?
             rtlsdr->NEW_SAMPLES.Emit();
 #endif
     }

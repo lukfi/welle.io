@@ -5,6 +5,7 @@
 #include "utils/screenlogger.h"
 
 RadioReceiverFM::RadioReceiverFM(RadioControllerInterface& rci,
+                                 ProgrammeHandlerInterface& output,
                                  InputInterface* input,
                                  RadioReceiverOptions rro,
                                  int transmission_mode,
@@ -16,17 +17,21 @@ RadioReceiverFM::RadioReceiverFM(RadioControllerInterface& rci,
 {
     if (mode == Mode_t::FM)
     {
-        mFmDecoder = new FmDecoderThreadWelle(mInput);
+        mFmDecoder = new FmDecoderThreadWelle(mInput, &output);
         FmDecoderThreadWelle::FmDecoderOptions options;
-        mFmDecoder->CreateDecoder(1.2e6,
-                                  0,
+
+        double ifrate = 1.2e6;
+        unsigned int downsample = std::max(1, int(ifrate / 215.0e3));
+
+        mFmDecoder->CreateDecoder(ifrate,
+                                  -300000,
                                   48000,
-                                  true);
-//        input->setDeviceParam(DeviceParam::InputFreq, 1.2e6);
-    }
-    else
-    {
-//        input->setDeviceParam(DeviceParam::InputFreq, 2048000);
+                                  true,
+                                  50,
+                                  100000,
+                                  75000,
+                                  15000,
+                                  downsample);
     }
 }
 

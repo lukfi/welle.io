@@ -96,6 +96,7 @@ PhaseDiscriminator::PhaseDiscriminator(double max_freq_dev)
 void PhaseDiscriminator::process(const IQSampleVector& samples_in,
                                  SampleVector& samples_out)
 {
+//    RTTIProfiler f("PhaseDiscriminator::process");
     size_t n = samples_in.size();
     IQSample s0 = m_last_sample;
 
@@ -516,7 +517,7 @@ void FmDecoder::Process(const SampleBufferBlock* samples_in, SampleVector& audio
 
 void FmDecoder::Process(const DSPCOMPLEX* samples_in, int32_t size, SampleVector& audio)
 {
-    RTTIProfiler f1("FmDecoder::Process");
+//    RTTIProfiler f1("FmDecoder::Process");
     // Fine tuning.
     m_finetuner.Process(samples_in, size, m_buf_iftuned);
 
@@ -726,9 +727,10 @@ void FmDecoderThread::DecodeIQSamples()
 
 #include "virtual_input.h"
 
-FmDecoderThreadWelle::FmDecoderThreadWelle(InputInterface* inputInterface) :
+FmDecoderThreadWelle::FmDecoderThreadWelle(InputInterface* inputInterface, ProgrammeHandlerInterface* output) :
     mThread("FmDecoder thread"),
-    mInput(inputInterface)
+    mInput(inputInterface),
+    mOutput(output)
 {
     CONNECT(mInput->NEW_SAMPLES, FmDecoderThreadWelle, OnNewIQSamples, this);
     mRunning = false;
@@ -737,6 +739,10 @@ FmDecoderThreadWelle::FmDecoderThreadWelle(InputInterface* inputInterface) :
 FmDecoderThreadWelle::~FmDecoderThreadWelle()
 {
     DISCONNECT(mInput->NEW_SAMPLES, FmDecoderThreadWelle, OnNewIQSamples, this);
+    if (mDecoder)
+    {
+        delete mDecoder;
+    }
 }
 
 bool FmDecoderThreadWelle::CreateDecoder(double sample_rate_if,
@@ -753,6 +759,16 @@ bool FmDecoderThreadWelle::CreateDecoder(double sample_rate_if,
 
     if (mDecoder == nullptr)
     {
+        SDEB("Creating FmDecoder sample rate: %f, tuning offset: %f, samplerate: %f, stereo: %d, deemph: %f, bandwidth: %f, freq: %f, bandwidth pcm: %f, downsaple: %u",
+                                                   sample_rate_if,
+                                                   tuning_offset,
+                                                   sample_rate_pcm,
+                                                   stereo,
+                                                   deemphasis,
+                                                   bandwidth_if,
+                                                   freq_dev,
+                                                   bandwidth_pcm,
+                                                   downsample);
         mDecoder = new FmDecoder(sample_rate_if,
                                  tuning_offset,
                                  sample_rate_pcm,
@@ -776,7 +792,6 @@ void FmDecoderThreadWelle::Reset(bool doScan)
 
 void FmDecoderThreadWelle::Start(bool doScan)
 {
-    SERR("!!!");
     if (!mRunning)
     {
         mInput->restart();
@@ -804,26 +819,81 @@ void FmDecoderThreadWelle::OnNewIQSamples()
     }
 }
 
+static void samplesToInt16(const SampleVector& samples, std::vector<int16_t>& out)
+{
+//    out.resize(samples.size());
+//    int i = 0;
+//    for (auto ss : samples)
+//    {
+//        Sample s = max(Sample(-1.0), min(Sample(1.0), ss));
+//        long v = lrint(s * 32767);
+//        unsigned long u = v;
+//        out[i++] = u;
+//    }
+
+    out.resize(samples.size());
+    int i = 0;
+    for (auto ss : samples)
+    {
+        float sss = ss;// * 0.5;
+        Sample s = max(Sample(-1.0), min(Sample(1.0), sss));
+        int16_t v = lrint(s * SHRT_MAX);
+        out[i++] = v;
+    }
+}
+
 void FmDecoderThreadWelle::DecodeIQSamples()
 {
 //    SDEB("+++");
     int32_t samples = mInput->getSamplesToRead();
-    while (samples)
+    if (samples)
     {
 //        SDEB("S %d", samples);
         std::vector<DSPCOMPLEX> buf;
         buf.resize(samples);
-        auto size = mInput->getSamples(buf.data(), samples);
+        int32_t size = 0;
+        {
+//            RTTIProfiler f1("GetSamples");
+            size = mInput->getSamples(buf.data(), samples);
+        }
         if (samples != size)
         {
 //            SWAR("Wrong number of samples read: %d, expected %d", size, samples);
         }
 
-        if (mDecoder)
+        if (mDecoder && size)
         {
+            ++mFmBlocks;
+            if (mFmBlocks < 3 && size > 131072)
+            {
+                SDEB("Omitting first block size: %d", size);
+                return;
+            }
+
             SampleVector audio;
-//            mDecoder->Process(buf.data(), size, audio);
-            //mAudioOutput->write(audio);
+            mDecoder->Process(buf.data(), size, audio);
+
+            std::vector<int16_t> out;
+            samplesToInt16(audio, out);
+            mOutput->onNewAudio(std::move(out), 48000, "FM");
+
+            if (false/* && mPrintStats*/)
+            {
+                //PRINT("\rblk=%6d  freq=%8.4fMHz  IF=%+5.1fdB  BB=%+5.1fdB  ",
+                PRINT("\rblk=%6d  IF=%+5.1fdB  BB=%+5.1fdB  ",
+                      mFmBlocks,
+//                      (mSource->get_frequency() + mDecoder->get_tuning_offset()) * 1.0e-6,
+                      20 * log10(mDecoder->get_if_level()),
+                      20 * log10(mDecoder->get_baseband_level()) + 3.01);
+                if (mDecoder->stereo_detected())
+                {
+                    PRINT("stereo (level: %.4f)", mDecoder->get_pilot_level());
+                }
+                else
+                {
+                    PRINT("                      ");
+                }
+            }
         }
         samples = 2 * mInput->getSamplesToRead();
     }

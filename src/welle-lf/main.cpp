@@ -41,7 +41,7 @@ int main()
         }
         else if (line == "fm")
         {
-            rc.playfm(96000000);
+            rc.playfm(96300000);
         }
         else if (line == "fm2")
         {

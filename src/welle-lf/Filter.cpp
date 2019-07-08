@@ -109,6 +109,7 @@ void FineTuner::Process(const SampleBufferBlock* samples_in, IQSampleVector& sam
 */
 void FineTuner::Process(const DSPCOMPLEX* samples_in, int32_t size, IQSampleVector& samples_out)
 {
+//    RTTIProfiler f("FineTuner::Process");
     unsigned int tblidx = m_index;
     auto tblsiz = m_table.size();
     int32_t n = size;
@@ -139,7 +140,7 @@ LowPassFilterFirIQ::LowPassFilterFirIQ(unsigned int filter_order, double cutoff)
 void LowPassFilterFirIQ::process(const IQSampleVector& samples_in,
                                  IQSampleVector& samples_out)
 {
-    RTTIProfiler f("LowPassFilterFirIQ::process");
+//    RTTIProfiler f("LowPassFilterFirIQ::process");
     unsigned int order = m_state.size();
     unsigned int n = samples_in.size();
 
@@ -209,12 +210,11 @@ DownsampleFilter::DownsampleFilter(unsigned int filter_order, double cutoff,
 void DownsampleFilter::process(const SampleVector& samples_in,
                                SampleVector& samples_out)
 {
-    RTTIProfiler f3("DownsampleFilter::process");
+//    RTTIProfiler f3("DownsampleFilter::process");
     unsigned int order = m_state.size();
     unsigned int n = samples_in.size();
 
     if (m_downsample_int != 0) {
-
         // Integer downsample factor, no linear interpolation.
         // This is relatively simple.
 
@@ -248,7 +248,6 @@ void DownsampleFilter::process(const SampleVector& samples_in,
         m_pos_int = p - n;
 
     } else {
-
         // Fractional downsample factor via linear interpolation of
         // the FIR coefficient table. This is a bitch.
 

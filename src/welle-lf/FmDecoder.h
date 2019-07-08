@@ -277,6 +277,7 @@ private:
 #include <thread>
 
 class InputInterface;
+class ProgrammeHandlerInterface;
 
 class FmDecoderThreadWelle
 {
@@ -294,7 +295,7 @@ public:
         unsigned int mDownsample = 1;
     };
 
-    FmDecoderThreadWelle(InputInterface* inputInterface);
+    FmDecoderThreadWelle(InputInterface* inputInterface, ProgrammeHandlerInterface* output);
     ~FmDecoderThreadWelle();
 
     bool CreateDecoder(double sample_rate_if,
@@ -317,7 +318,10 @@ private:
     LF::threads::IOThread mThread;
 
     InputInterface* mInput { nullptr };
+    ProgrammeHandlerInterface* mOutput { nullptr };
     FmDecoder* mDecoder { nullptr };
+
+    uint32_t mFmBlocks { 0 };
 
     std::atomic<bool> mRunning { false };
 
