@@ -70,6 +70,7 @@ void RadioController::CloseDevice()
 
 CDeviceID RadioController::OpenDevice()
 {
+    SDEB("OpenDevice");
     SCHEDULE_TASK(&mRadioControllerThread, &RadioController::OpenDeviceInternal, this);
     if (mOpenDeviceEvent.Wait(3000))
     {
@@ -82,7 +83,18 @@ CDeviceID RadioController::OpenDevice()
 
 void RadioController::play(std::string channel, std::string title, uint32_t service)
 {
-    EXECUTE_IN_THREAD(&mRadioControllerThread, &RadioController::play, this, channel, title, service);
+    SCHEDULE_TASK(&mRadioControllerThread, &RadioController::playdvb, this, channel, title, service);
+}
+
+void RadioController::play(int fmFreq)
+{
+    SCHEDULE_TASK(&mRadioControllerThread, &RadioController::playfm, this, fmFreq, false);
+}
+
+void RadioController::playdvb(std::string channel, std::string title, uint32_t service)
+{
+    LF_ASSERT_THREAD(mRadioControllerThread);
+//    EXECUTE_IN_THREAD(&mRadioControllerThread, &RadioController::playdvb, this, channel, title, service);
     if (channel == "") {
         return;
     }
@@ -90,15 +102,7 @@ void RadioController::play(std::string channel, std::string title, uint32_t serv
     currentTitle = title;
 //    emit titleChanged();
 
-    if (mMode == RadioReceiverFM::Mode_t::FM)
-    {
-        ResetTechnicalData();
-        mRadioReceiver = nullptr;
-        mMode = RadioReceiverFM::Mode_t::DVBT;
-        mDevice->setDeviceParam(DeviceParam::AGC, 0);
-        mDevice->setDeviceParam(DeviceParam::InputFreq, INPUT_RATE);
-    }
-
+    ChangeMode(RadioReceiverFM::Mode_t::DVB);
 
     SUCC("Play: %s %x on channel %d", title.c_str(), service, channel.c_str());
 
@@ -114,21 +118,17 @@ void RadioController::play(std::string channel, std::string title, uint32_t serv
     //settings.setValue("lastchannel", QStringList() << serialise_serviceid(service) << channel);
 }
 
-void RadioController::playfm(int fmFreq)
+void RadioController::playfm(int fmFreq, bool scan)
 {
-    SDEB("playfm, th %d", LF::threads::GetThisThreadId());
-    EXECUTE_IN_THREAD(&mRadioControllerThread, &RadioController::playfm, this, fmFreq);
-
-    if (mMode == RadioReceiverFM::Mode_t::DVBT)
+    LF_ASSERT_THREAD(mRadioControllerThread);
+    if (!scan)
     {
-        ResetTechnicalData();
-        mRadioReceiver = nullptr;
-        mMode = RadioReceiverFM::Mode_t::FM;
-        mDevice->setDeviceParam(DeviceParam::AGC, 1);
-        mDevice->setDeviceParam(DeviceParam::InputFreq, INPUT_FM_RATE);
+        SINFO("PLAY FM: %.1f", fmFreq / 1e6);
     }
 
-    if (isChannelScan == true)
+    ChangeMode(RadioReceiverFM::Mode_t::FM);
+
+    if (isChannelScan == true && !scan)
     {
         stopScan();
         channelTimer.Stop();
@@ -150,7 +150,7 @@ void RadioController::playfm(int fmFreq)
         if(currentFrequency != 0 && mDevice)
         {
             mFmTunerFreq = currentFrequency + 0.25 * INPUT_FM_RATE;
-            SDEB("Tune to freq: %fMHz (%f)", currentFrequency / 1e6, mFmTunerFreq / 1e6);
+            //SDEB("Tune to freq: %fMHz (%f)", currentFrequency / 1e6, mFmTunerFreq / 1e6);
             mDevice->setFrequency(static_cast<int>(mFmTunerFreq));
             mDevice->reset(); // Clear buffer
         }
@@ -162,10 +162,18 @@ void RadioController::playfm(int fmFreq)
     options.mTuning_offset = currentFrequency - mFmTunerFreq;
     options.mSample_rate_pcm = PCM_RATE;
 
-    mRadioReceiver = std::make_unique<RadioReceiverFM>(*this,*this , mDevice.get(), rro, 1, RadioReceiverFM::Mode_t::FM, &options);
-    SINFO("NEW Receiver!!");
-    mRadioReceiver->setReceiverOptions(rro);
-    mRadioReceiver->Start(RadioReceiverFM::Mode_t::FM, false);
+    if (mRadioReceiver == nullptr)
+    {
+        mRadioReceiver = std::make_unique<RadioReceiverFM>(*this,*this , mDevice.get(), rro, 1, RadioReceiverFM::Mode_t::FM, &options);
+        SINFO("NEW Receiver!!");
+        mRadioReceiver->setReceiverOptions(rro);
+        mRadioReceiver->Start(RadioReceiverFM::Mode_t::FM, false);
+    }
+    else
+    {
+        //SDEB("Reusing old receiver");
+//        mRadioReceiver->ResetDecoderStats();
+    }
 }
 
 void RadioController::stop()
@@ -233,10 +241,10 @@ void RadioController::setChannel(std::string Channel, bool isScan, bool Force)
         }
 
         // Restart demodulator and decoder
-        mRadioReceiver = std::make_unique<RadioReceiverFM>(*this, *this, mDevice.get(), rro, 1, RadioReceiverFM::Mode_t::DVBT);
+        mRadioReceiver = std::make_unique<RadioReceiverFM>(*this, *this, mDevice.get(), rro, 1, RadioReceiverFM::Mode_t::DVB);
         SINFO("NEW Receiver!!");
         mRadioReceiver->setReceiverOptions(rro);
-        mRadioReceiver->Start(RadioReceiverFM::Mode_t::DVBT, isScan);
+        mRadioReceiver->Start(RadioReceiverFM::Mode_t::DVB, isScan);
 
 //        emit channelChanged();
 //        emit ensembleChanged();
@@ -248,10 +256,32 @@ void RadioController::setChannel(std::string Channel, bool isScan, bool Force)
     }
 }
 
-void RadioController::startScan()
+void RadioController::startScan(bool backward)
+{
+    StartScanInternal(mMode, backward ? FmScanMode::FullScanBackward : FmScanMode::FullScan);
+}
+
+void RadioController::startScan(RadioReceiverFM::Mode_t mode)
+{
+    StartScanInternal(mode, FmScanMode::FullScan);
+}
+
+void RadioController::FmSeekNext()
+{
+    StartScanInternal(RadioReceiverFM::Mode_t::FM, FmScanMode::ForwardScan);
+}
+
+void RadioController::FmSeekPrev()
+{
+    StartScanInternal(RadioReceiverFM::Mode_t::FM, FmScanMode::BackwardScan);
+}
+
+void RadioController::StartScanInternal(RadioReceiverFM::Mode_t mode, FmScanMode fmScanMode)
 {
     SDEB("Start channel scan, th %d", LF::threads::GetThisThreadId());
-    EXECUTE_IN_THREAD(&mRadioControllerThread, &RadioController::startScan, this);
+    EXECUTE_IN_THREAD(&mRadioControllerThread, &RadioController::StartScanInternal, this, mode, fmScanMode);
+
+    ChangeMode(mode);
 
     DeviceRestart();
 
@@ -263,28 +293,80 @@ void RadioController::startScan()
     }
     else
     {
-        // Start with lowest frequency
-//        std::string Channel = Channels::firstChannel;
-        std::string Channel = "11B";
-        setChannel(Channel, true);
+        if (mMode == RadioReceiverFM::Mode_t::DVB)
+        {
+            // Start with lowest frequency
+//            std::string Channel = Channels::firstChannel;
+            std::string Channel = "11B";
+            setChannel(Channel, true);
 
-        isChannelScan = true;
-        stationCount = 0;
-        currentTitle = LF::utils::sformat("Scanning ... %s (%d\\%)", Channel.c_str(), (1 * 100 / NUMBEROFCHANNELS));
-//        emit titleChanged();
+            isChannelScan = true;
 
-        currentText = LF::utils::sformat("Found channels: %d", stationCount);
-//        emit textChanged();
+            mScanningStopwatch.Start();
 
-        currentService = 0;
-//        emit stationChanged();
+            stationCount = 0;
+            currentTitle = LF::utils::sformat("Scanning ... %s (%d\\%)", Channel.c_str(), (1 * 100 / NUMBEROFCHANNELS));
+//            emit titleChanged();
 
-        currentStationType = "";
-//        emit stationTypChanged();
+            currentText = LF::utils::sformat("Found channels: %d", stationCount);
+//            emit textChanged();
 
-        currentLanguageType = "";
-//        emit languageTypeChanged();
+            currentService = 0;
+//            emit stationChanged();
 
+            currentStationType = "";
+//            emit stationTypChanged();
+
+            currentLanguageType = "";
+//            emit languageTypeChanged();
+
+        }
+        else // FM
+        {
+            mDevice->setDeviceParam(DeviceParam::AGC, 14);
+            isChannelScan = true;
+            mFmScanMode = fmScanMode;
+
+            mScanningStopwatch.Start();
+
+            mFmScanRmsMap.clear();
+            mFmScanFound.clear();
+            if (mFmScanMode == FmScanMode::FullScan)
+            {
+                playfm(FM_LOW_FREQ, true);
+            }
+            else if (mFmScanMode == FmScanMode::FullScanBackward)
+            {
+                playfm(FM_HI_FREQ, true);
+            }
+            else
+            {
+                int32_t nextFreq = currentFrequency;
+                if (nextFreq > FM_HI_FREQ || nextFreq < FM_LOW_FREQ)
+                {
+                    if (mFmScanMode == FmScanMode::ForwardScan)
+                    {
+                        nextFreq = FM_LOW_FREQ;
+                    }
+                    else
+                    {
+                        nextFreq = FM_HI_FREQ;
+                    }
+                }
+                else
+                {
+                    if (mFmScanMode == FmScanMode::ForwardScan)
+                    {
+                        nextFreq += FM_FREQ_STEP;
+                    }
+                    else
+                    {
+                        nextFreq -= FM_FREQ_STEP;
+                    }
+                }
+                playfm(nextFreq, true);
+            }
+        }
 //        emit scanProgress(0);
     }
 }
@@ -300,6 +382,17 @@ void RadioController::stopScan()
 //    emit textChanged();
 
     isChannelScan = false;
+    mFmScanMode = FmScanMode::NoScan;
+    mScanningStopwatch.Stop();
+
+    if (mMode == RadioReceiverFM::Mode_t::FM)
+    {
+        mDevice->setDeviceParam(DeviceParam::AGC, -1);
+    }
+    else // DVB
+    {
+        mDevice->setDeviceParam(DeviceParam::AGC, -2);
+    }
     //    emit scanStopped();
 }
 
@@ -411,6 +504,99 @@ void RadioController::onMOT(const std::vector<uint8_t>& data, int subtype)
 void RadioController::onPADLengthError(size_t announced_xpad_len, size_t xpad_len)
 {
     SWAR("X-PAD length mismatch, expected: %lld effective: %lld", announced_xpad_len, xpad_len);
+}
+
+void RadioController::onFMRmsReport(double dbm, double lvl)
+{
+    if (isChannelScan)
+    {
+        mFmScanRmsMap[currentFrequency] = { dbm, lvl };
+        SDEB("%2.1fMHz: %f dbm %f lvl", currentFrequency / 1e6, dbm, lvl);
+        auto nextFreq = currentFrequency;
+        auto prevFreq = currentFrequency;
+        int prevPrevFreq;
+        if (mFmScanMode == FmScanMode::BackwardScan || mFmScanMode == FmScanMode::FullScanBackward)
+        {
+            nextFreq -= FM_FREQ_STEP;
+            prevFreq += FM_FREQ_STEP;
+            prevPrevFreq = prevFreq + FM_FREQ_STEP;
+        }
+        else
+        {
+            nextFreq += FM_FREQ_STEP;
+            prevFreq -= FM_FREQ_STEP;
+            prevPrevFreq = prevFreq - FM_FREQ_STEP;
+        }
+
+        if (!std::isnan(dbm))
+        {
+            auto last = mFmScanRmsMap.find(prevFreq);
+            if (last != mFmScanRmsMap.end())
+            {
+                double prevRms = last->second.mRms;
+                double prevLvl = last->second.mLvl;
+
+                if (!std::isnan(prevRms) && prevRms > dbm && prevRms > - 20.0 &&
+                    mFmScanFound.find(prevPrevFreq) == mFmScanFound.end())
+                {
+                    if (prevRms * prevLvl < dbm * lvl)
+                    {
+                        mFmScanFound.insert(prevFreq);
+                        if (mFmScanMode == FmScanMode::ForwardScan || mFmScanMode == FmScanMode::BackwardScan)
+                        {
+                            stopScan();
+                            mScanningStopwatch.Stop();
+                            play(prevFreq);
+                            return;
+                        }
+                    }
+                }
+            }
+        }
+
+        if (nextFreq > FM_HI_FREQ)
+        {
+            if (mFmScanMode == FmScanMode::ForwardScan)
+            {
+                SCHEDULE_TASK(&mRadioControllerThread, &RadioController::playfm, this, FM_LOW_FREQ, true);
+                return;
+            }
+        }
+        else if (nextFreq < FM_LOW_FREQ)
+        {
+            if (mFmScanMode == FmScanMode::BackwardScan)
+            {
+                SCHEDULE_TASK(&mRadioControllerThread, &RadioController::playfm, this, FM_HI_FREQ, true);
+                return;
+            }
+        }
+        else
+        {
+            SCHEDULE_TASK(&mRadioControllerThread, &RadioController::playfm, this, nextFreq, true);
+            return;
+        }
+
+        stopScan();
+        mScanningStopwatch.Stop();
+        SINFO("FM scanning finished: %d sec.", mScanningStopwatch.Check().totalMs / 1000);
+        for (auto p = mFmScanRmsMap.begin(); p != mFmScanRmsMap.end(); ++p)
+        {
+            int fr = p->first;
+            if (mFmScanFound.find(fr) != mFmScanFound.end())
+            {
+                SINFO("%2.1fMHz: %f dbm %f lvl = %f", fr / 1e6, p->second.mRms, p->second.mLvl, p->second.mRms * p->second.mLvl);
+            }
+            else
+            {
+                //SDEB("%2.1fMHz: %f dbm %f lvl = %f", fr / 1e6, p->second.mRms, p->second.mLvl, p->second.mRms * p->second.mLvl);
+            }
+        }
+
+        if (!mFmScanFound.empty())
+        {
+            play(*mFmScanFound.begin());
+        }
+    }
 }
 
 void RadioController::onSNR(int snr)
@@ -556,7 +742,7 @@ void RadioController::Initialise()
 //    emit deviceIdChanged();
 
     if(isAutoPlay) {
-        play(autoChannel, "Playing last station", autoService);
+        playdvb(autoChannel, "Playing last station", autoService);
     }
 }
 
@@ -607,7 +793,7 @@ void RadioController::ResetTechnicalData()
 
 void RadioController::DeviceRestart()
 {
-    SDEB("deviceRestart");
+    //SDEB("deviceRestart");
     bool isPlay = false;
 
     if(mDevice) {
@@ -624,6 +810,27 @@ void RadioController::DeviceRestart()
     }
 
     labelTimer.Start(40);
+}
+
+void RadioController::ChangeMode(RadioReceiverFM::Mode_t mode)
+{
+    if (mMode != mode)
+    {
+        ResetTechnicalData();
+        mRadioReceiver = nullptr;
+        mMode = mode;
+        if (mode == RadioReceiverFM::Mode_t::FM)
+        {
+            mDevice->setDeviceParam(DeviceParam::AGC, -1);
+            mDevice->setDeviceParam(DeviceParam::InputFreq, INPUT_FM_RATE);
+        }
+        else // DVB
+        {
+            mDevice->setDeviceParam(DeviceParam::AGC, -2);
+            mDevice->setDeviceParam(DeviceParam::InputFreq, INPUT_RATE);
+        }
+        SINFO("Mode changed to %s", mode == RadioReceiverFM::Mode_t::FM ? "FM" : "DVB");
+    }
 }
 
 void RadioController::ensembleId(uint16_t eId)

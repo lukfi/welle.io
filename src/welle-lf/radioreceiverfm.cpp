@@ -55,6 +55,7 @@ RadioReceiverFM::~RadioReceiverFM()
     if (mFmDecoder)
     {
         mFmDecoder->Stop();
+        delete mFmDecoder;
     }
     SDEB("FM decoder stopped");
 }
@@ -65,10 +66,10 @@ void RadioReceiverFM::Start(RadioReceiverFM::Mode_t mode, bool doScan)
 //    mMode = mode;
     if (modeCahnged)
     {
-        SWAR("Swithcing to mode %s", mode == Mode_t::DVBT ? "DVBT" : "FM");
+        SWAR("Swithcing to mode %s", mode == Mode_t::DVB ? "DVBT" : "FM");
     }
 
-    if (mMode == Mode_t::DVBT)
+    if (mMode == Mode_t::DVB)
     {
 //        if (mFmDecoder)
 //        {
@@ -93,5 +94,13 @@ void RadioReceiverFM::Start(RadioReceiverFM::Mode_t mode, bool doScan)
 //                                 48000,
 //                                 true);
         mFmDecoder->Start(doScan);
+    }
+}
+
+void RadioReceiverFM::ResetDecoderStats()
+{
+    if (mFmDecoder)
+    {
+        mFmDecoder->ResetDecoderStats();
     }
 }

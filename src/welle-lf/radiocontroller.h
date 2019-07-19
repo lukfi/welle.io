@@ -4,6 +4,7 @@
 #include "threads/iothread.h"
 #include "threads/event.h"
 #include "audio/audiobuffer.h"
+#include "utils/stopwatch.h"
 
 #include "dab-constants.h"
 //#include "radio-receiver.h"
@@ -21,14 +22,19 @@ public:
     CDeviceID OpenDevice();
 //    void setDeviceParam(std::string param, int value);
 //    void setDeviceParam(std::string param, std::string value);
+
     void play(std::string channel, std::string title, uint32_t service);
-    void playfm(int fmFreq);
+    void play(int fmFreq);
+
 //    void pause();
     void stop();
     void setService(uint32_t service, bool force = false);
     void setChannel(std::string Channel, bool isScan, bool Force = false);
 //    Q_INVOKABLE void setManualChannel(QString Channel);
-    void startScan(void);
+    void startScan(bool backward = false);
+    void startScan(RadioReceiverFM::Mode_t mode);
+    void FmSeekNext();
+    void FmSeekPrev();
     void stopScan(void);
 //    void setAutoPlay(QString channel, QString serviceid_as_string);
 //    Q_INVOKABLE void setVolume(qreal volume);
@@ -54,6 +60,7 @@ public:
     virtual void onNewDynamicLabel(const std::string& label) override;
     virtual void onMOT(const std::vector<uint8_t>& data, int subtype) override;
     virtual void onPADLengthError(size_t announced_xpad_len, size_t xpad_len) override;
+    virtual void onFMRmsReport(double dbm, double lvl) override;
 
     virtual void onSNR(int snr) override;
     virtual void onFrequencyCorrectorChange(int fine, int coarse) override;
@@ -70,10 +77,26 @@ public:
     virtual void onMessage(message_level_t level, const std::string& text) override;
 
 private:
+    enum class FmScanMode
+    {
+        NoScan,
+        FullScan,
+        FullScanBackward,
+        ForwardScan,
+        BackwardScan
+    };
+
     void OpenDeviceInternal();
     void Initialise(void);
     void ResetTechnicalData(void);
     void DeviceRestart(void);
+    void StartScanInternal(RadioReceiverFM::Mode_t mode, FmScanMode fmScanMode);
+
+    void ChangeMode(RadioReceiverFM::Mode_t mode);
+
+    void playdvb(std::string channel, std::string title, uint32_t service);
+    void playfm(int fmFreq, bool scan);
+
 
     std::shared_ptr<CVirtualInput> mDevice;
 //    QVariantMap commandLineOptions;
@@ -139,9 +162,14 @@ private:
     std::string autoChannel;
     uint32_t autoService;
 
-    RadioReceiverFM::Mode_t mMode { RadioReceiverFM::Mode_t::DVBT };
+    RadioReceiverFM::Mode_t mMode { RadioReceiverFM::Mode_t::DVB };
     double mFmTunerFreq { 0 };
+    struct FMRMS { double mRms; double mLvl; };
+    std::map<int32_t, FMRMS> mFmScanRmsMap;
+    std::set<int> mFmScanFound;
+    FmScanMode mFmScanMode { FmScanMode::NoScan };
 
+    LF::utils::StopWatch mScanningStopwatch;
 //public slots:
 //    void setErrorMessage(QString Text);
 //    void setErrorMessage(const std::string& head, const std::string& text = "");

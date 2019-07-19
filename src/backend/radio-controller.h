@@ -159,6 +159,8 @@ class ProgrammeHandlerInterface {
          * and effective X-PAD length.
          */
         virtual void onPADLengthError(size_t announced_xpad_len, size_t xpad_len) = 0;
+
+        virtual void onFMRmsReport(double dbm, double lvl) = 0;
 };
 
 enum class DeviceParam {

@@ -1,4 +1,3 @@
-
 #include <cassert>
 #include <cmath>
 
@@ -502,16 +501,14 @@ void FmDecoder::Process(const SampleBufferBlock* samples_in, SampleVector& audio
             m_deemph_mono.process_inplace(m_buf_mono);
             // Duplicate mono signal in left/right channels.
             mono_to_left_right(m_buf_mono, audio);
-
         }
-
-    } else {
-
+    }
+    else
+    {
         // Mono deemphasis
         m_deemph_mono.process_inplace(m_buf_mono);
         // Just return mono channel.
         audio = move(m_buf_mono);
-
     }
 }
 
@@ -588,10 +585,15 @@ void FmDecoder::Process(const DSPCOMPLEX* samples_in, int32_t size, SampleVector
         m_deemph_mono.process_inplace(m_buf_mono);
         // Just return mono channel.
         audio = move(m_buf_mono);
-
     }
 }
 
+void FmDecoder::ResetStats()
+{
+    m_if_level = 0;
+    m_baseband_mean = 0;
+    m_baseband_level = 0;
+}
 
 // Demodulate stereo L-R signal.
 void FmDecoder::demod_stereo(const SampleVector& samples_baseband,
@@ -810,6 +812,11 @@ void FmDecoderThreadWelle::Stop()
     }
 }
 
+void FmDecoderThreadWelle::ResetDecoderStats()
+{
+    mResetStats = true;
+}
+
 void FmDecoderThreadWelle::OnNewIQSamples()
 {
 //    SDEB("@@@");
@@ -863,7 +870,17 @@ void FmDecoderThreadWelle::DecodeIQSamples()
 
         if (mDecoder && size)
         {
-            ++mFmBlocks;
+//            if (mResetStats)
+//            {
+//                mResetStats = false;
+//                mDecoder->ResetStats();
+//                mFmBlocks = 0;
+//            }
+//            else
+//            {
+//                ++mFmBlocks;
+//            }
+
             if (mFmBlocks < 3 && size > 131072)
             {
                 SDEB("Omitting first block size: %d", size);
@@ -876,6 +893,24 @@ void FmDecoderThreadWelle::DecodeIQSamples()
             std::vector<int16_t> out;
             samplesToInt16(audio, out);
             mOutput->onNewAudio(std::move(out), 48000, "FM");
+
+//            if (mResetStats)
+//            {
+//                mResetStats = false;
+//                mDecoder->ResetStats();
+//                mFmBlocks = 0;
+//            }
+//            else
+//            {
+                ++mFmBlocks;
+//            }
+
+            if (mFmBlocks && mFmBlocks % 3 == 0)
+            {
+                mOutput->onFMRmsReport(20 * log10(mDecoder->get_baseband_mean()), 20 * log10(mDecoder->get_if_level()));
+                //SINFO("BB: %f / %.2f dbm, IF: %f / %.2f dbm", mDecoder->get_baseband_mean(), 20 * log10(abs(mDecoder->get_baseband_mean())),
+                //                                             mDecoder->get_if_level(),      20 * log10(mDecoder->get_if_level()));
+            }
 
             if (false/* && mPrintStats*/)
             {

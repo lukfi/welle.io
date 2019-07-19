@@ -12,7 +12,6 @@ class SampleBufferBlock;
 class PhaseDiscriminator
 {
 public:
-
     /**
      * Construct phase discriminator.
      *
@@ -26,28 +25,26 @@ public:
      * Output is a sequence of frequency estimates, scaled such that
      * output value +/- 1.0 represents the maximum frequency deviation.
      */
-    void process(const IQSampleVector& samples_in, SampleVector& samples_out);
+    void process(const IQSampleVector &samples_in, SampleVector &samples_out);
 
 private:
     const Sample m_freq_scale_factor;
-    IQSample     m_last_sample;
+    IQSample m_last_sample;
 };
-
 
 /** Phase-locked loop for stereo pilot. */
 class PilotPhaseLock
 {
 public:
-
-    /** Expected pilot frequency (used for PPS events). */ 
+    /** Expected pilot frequency (used for PPS events). */
     static constexpr int pilot_frequency = 19000;
 
     /** Timestamp event produced once every 19000 pilot periods. */
     struct PpsEvent
     {
-        std::uint64_t   pps_index;
-        std::uint64_t   sample_index;
-        double          block_position;
+        std::uint64_t pps_index;
+        std::uint64_t sample_index;
+        double block_position;
     };
 
     /**
@@ -64,7 +61,7 @@ public:
      * Process samples and extract 19 kHz pilot tone.
      * Generate phase-locked 38 kHz tone with unit amplitude.
      */
-    void process(const SampleVector& samples_in, SampleVector& samples_out);
+    void process(const SampleVector &samples_in, SampleVector &samples_out);
 
     /** Return true if the phase-locked loop is locked. */
     bool locked() const
@@ -85,22 +82,21 @@ public:
     }
 
 private:
-    Sample  m_minfreq, m_maxfreq;
-    Sample  m_phasor_b0, m_phasor_a1, m_phasor_a2;
-    Sample  m_phasor_i1, m_phasor_i2, m_phasor_q1, m_phasor_q2;
-    Sample  m_loopfilter_b0, m_loopfilter_b1;
-    Sample  m_loopfilter_x1;
-    Sample  m_freq, m_phase;
-    Sample  m_minsignal;
-    Sample  m_pilot_level;
-    int     m_lock_delay;
-    int     m_lock_cnt;
-    int     m_pilot_periods;
-    std::uint64_t         m_pps_cnt;
-    std::uint64_t         m_sample_cnt;
+    Sample m_minfreq, m_maxfreq;
+    Sample m_phasor_b0, m_phasor_a1, m_phasor_a2;
+    Sample m_phasor_i1, m_phasor_i2, m_phasor_q1, m_phasor_q2;
+    Sample m_loopfilter_b0, m_loopfilter_b1;
+    Sample m_loopfilter_x1;
+    Sample m_freq, m_phase;
+    Sample m_minsignal;
+    Sample m_pilot_level;
+    int m_lock_delay;
+    int m_lock_cnt;
+    int m_pilot_periods;
+    std::uint64_t m_pps_cnt;
+    std::uint64_t m_sample_cnt;
     std::vector<PpsEvent> m_pps_events;
 };
-
 
 /** Complete decoder for FM broadcast signal. */
 class FmDecoder
@@ -135,12 +131,12 @@ public:
     FmDecoder(double sample_rate_if,
               double tuning_offset,
               double sample_rate_pcm,
-              bool   stereo=true,
-              double deemphasis=50,
-              double bandwidth_if=default_bandwidth_if,
-              double freq_dev=default_freq_dev,
-              double bandwidth_pcm=default_bandwidth_pcm,
-              unsigned int downsample=1);
+              bool stereo = true,
+              double deemphasis = 50,
+              double bandwidth_if = default_bandwidth_if,
+              double freq_dev = default_freq_dev,
+              double bandwidth_pcm = default_bandwidth_pcm,
+              unsigned int downsample = 1);
 
     /**
      * Process IQ samples and return audio samples.
@@ -150,9 +146,9 @@ public:
      * signal is detected). If the decoder is set in mono mode, the output
      * vector only contains samples for one channel.
      */
-    void process(const IQSampleVector& samples_in, SampleVector& audio);
-    void Process(const SampleBufferBlock* samples_in, SampleVector& audio);
-    void Process(const DSPCOMPLEX* samples_in, int32_t size, SampleVector& audio);
+    void process(const IQSampleVector &samples_in, SampleVector &audio);
+    void Process(const SampleBufferBlock *samples_in, SampleVector &audio);
+    void Process(const DSPCOMPLEX *samples_in, int32_t size, SampleVector &audio);
 
     /** Return true if a stereo signal is detected. */
     bool stereo_detected() const
@@ -163,8 +159,7 @@ public:
     /** Return actual frequency offset in Hz with respect to receiver LO. */
     double get_tuning_offset() const
     {
-        double tuned = - m_tuning_shift * m_sample_rate_if /
-                       double(m_tuning_table_size);
+        double tuned = -m_tuning_shift * m_sample_rate_if / double(m_tuning_table_size);
         return tuned + m_baseband_mean * m_freq_dev;
     }
 
@@ -180,6 +175,11 @@ public:
         return m_baseband_level;
     }
 
+    double get_baseband_mean() const
+    {
+        return m_baseband_mean;
+    }
+
     /** Return amplitude of stereo pilot (nominal level is 0.1). */
     double get_pilot_level() const
     {
@@ -191,6 +191,8 @@ public:
     {
         return m_pilotpll.get_pps_events();
     }
+
+    void ResetStats();
 
 private:
     /** Demodulate stereo L-R signal. */
@@ -252,7 +254,7 @@ public:
     bool CreateDecoder(double sample_rate_if,
                        double tuning_offset,
                        double sample_rate_pcm,
-                       bool   stereo = true,
+                       bool stereo = true,
                        double deemphasis = 50,
                        double bandwidth_if = FmDecoder::default_bandwidth_if,
                        double freq_dev = FmDecoder::default_freq_dev,
@@ -262,16 +264,16 @@ public:
     ~FmDecoderThread();
 
 private:
-    void OnNewIQSamples(RtlSdrSource*);
+    void OnNewIQSamples(RtlSdrSource *);
     void DecodeIQSamples();
 
     LF::threads::IOThread mThread;
-    FmDecoder* mDecoder { nullptr };
-    RtlSdrSource* mSource { nullptr };
-    AudioOutput* mAudioOutput { nullptr };
+    FmDecoder *mDecoder{nullptr};
+    RtlSdrSource *mSource{nullptr};
+    AudioOutput *mAudioOutput{nullptr};
 
-    bool mPrintStats { true };
-    uint32_t mBlocks { 0 };
+    bool mPrintStats{true};
+    uint32_t mBlocks{0};
 };
 
 #include <thread>
@@ -287,21 +289,21 @@ public:
         double mSample_rate_if;
         double mTuning_offset;
         double mSample_rate_pcm;
-        bool   mStereo = true;
+        bool mStereo = true;
         double mDeemphasis = 50;
         double mBandwidth_if = FmDecoder::default_bandwidth_if;
         double mFreq_dev = FmDecoder::default_freq_dev;
         double mBandwidth_pcm = FmDecoder::default_bandwidth_pcm;
-//        unsigned int mDownsample = 1; always calculate
+        //        unsigned int mDownsample = 1; always calculate
     };
 
-    FmDecoderThreadWelle(InputInterface* inputInterface, ProgrammeHandlerInterface* output);
+    FmDecoderThreadWelle(InputInterface *inputInterface, ProgrammeHandlerInterface *output);
     ~FmDecoderThreadWelle();
 
     bool CreateDecoder(double sample_rate_if,
                        double tuning_offset,
                        double sample_rate_pcm,
-                       bool   stereo = true,
+                       bool stereo = true,
                        double deemphasis = 50,
                        double bandwidth_if = FmDecoder::default_bandwidth_if,
                        double freq_dev = FmDecoder::default_freq_dev,
@@ -312,19 +314,21 @@ public:
     void Start(bool doScan);
     void Stop();
 
+    void ResetDecoderStats();
+
 private:
     void OnNewIQSamples();
     void DecodeIQSamples();
     LF::threads::IOThread mThread;
 
-    InputInterface* mInput { nullptr };
-    ProgrammeHandlerInterface* mOutput { nullptr };
-    FmDecoder* mDecoder { nullptr };
+    InputInterface *mInput{nullptr};
+    ProgrammeHandlerInterface *mOutput{nullptr};
+    FmDecoder *mDecoder{nullptr};
 
-    uint32_t mFmBlocks { 0 };
+    uint32_t mFmBlocks{0};
 
     std::atomic<bool> mRunning { false };
-
+    std::atomic<bool> mResetStats { false };
 };
 
 #endif

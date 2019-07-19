@@ -41,23 +41,35 @@ int main()
         }
         else if (line == "fm")
         {
-            rc.playfm(96000000);
+            rc.play(96000000);
         }
         else if (line == "fm2")
         {
-            rc.playfm(101000000);
+            rc.play(101000000);
         }
         else if (line == "scan")
         {
             rc.startScan();
         }
+        else if (line == "scanback")
+        {
+            rc.startScan(true);
+        }
         else if (line == "m")
         {
             rc.PrintMeasueres();
         }
+        else if (line == "next")
+        {
+            rc.FmSeekNext();
+        }
+        else if (line == "prev")
+        {
+            rc.FmSeekPrev();
+        }
         else
         {
-            break;
+            // unknown command
         }
     }
     return 0;

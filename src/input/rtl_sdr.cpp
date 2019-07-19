@@ -131,7 +131,7 @@ void CRTL_SDR::setFrequency(int frequency)
         std::lock_guard<std::mutex> lock(mRtlSdrMutex);
         ret = rtlsdr_set_center_freq(device, frequency + frequencyOffset);
     }
-    SDEB("Freq set: %d == %d %s(%d)", frequency + frequencyOffset, rtlsdr_get_center_freq(device), (ret == 0) ? "OK" : "FAIL", ret);
+    //SDEB("Freq set: %d == %d %s(%d)", frequency + frequencyOffset, rtlsdr_get_center_freq(device), (ret == 0) ? "OK" : "FAIL", ret);
 }
 
 int CRTL_SDR::getFrequency(void) const
@@ -282,24 +282,36 @@ bool CRTL_SDR::setDeviceParam(DeviceParam param, int value)
     }
     case DeviceParam::AGC:
     {
-        if (value == 0)
+        if (value == -2)
         {
-            SDEB("Manual AGC");
+            SDEB("Manual Gain - SW handled (DVB)");
             {
                 std::lock_guard<std::mutex> lock(mRtlSdrMutex);
                 rtlsdr_set_tuner_gain_mode(device, 1);
             }
-            //setGain(0);
             setAgc(true);
         }
-        else
+        else if (value == -1)
         {
-            SDEB("Automatic AGC");
+            SDEB("Automatic Gain (FM)");
             isAGC = false;
             {
                 std::lock_guard<std::mutex> lock(mRtlSdrMutex);
                 rtlsdr_set_tuner_gain_mode(device, 0);
             }
+        }
+        else if (value >= 0 && value < gains.size())
+        {
+            SDEB("Manual Gain set: %.2f dm (FM scanning)", gains[value] / 10.0);
+            {
+                std::lock_guard<std::mutex> lock(mRtlSdrMutex);
+                rtlsdr_set_tuner_gain_mode(device, 1);
+            }
+            setGain(value);
+        }
+        else
+        {
+            SWAR("Wrong AGC parameter");
         }
         return true;
     }

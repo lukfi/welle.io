@@ -7,12 +7,16 @@
 #define INPUT_FM_RATE (1.2e6)
 #define PCM_RATE (48000)
 
+#define FM_FREQ_STEP  100000
+#define FM_LOW_FREQ 87000000
+#define FM_HI_FREQ 108000000
+
 class RadioReceiverFM : public RadioReceiver
 {
 public:
     enum class Mode_t
     {
-        DVBT,
+        DVB,
         FM
     };
 
@@ -26,11 +30,12 @@ public:
     ~RadioReceiverFM();
 
     void Start(Mode_t mode, bool doScan);
+    void ResetDecoderStats();
 
 private:
     InputInterface* mInput;
     FmDecoderThreadWelle* mFmDecoder;
-    Mode_t mMode { Mode_t::DVBT };
+    Mode_t mMode { Mode_t::DVB };
 };
 
 #endif // RADIORECEIVERFM_H
