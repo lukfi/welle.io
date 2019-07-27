@@ -18,3 +18,7 @@ HEADERS += \
     $$PWD/welle-lf/radioreceiverfm.h
 
 LIBS += -L$$PWD/../../CommonLibs/debug -lSystem -lMultimedia
+
+unix {
+LIBS += -pthread -lpulse -lpulse-simple -lasound
+}
