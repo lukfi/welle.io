@@ -1,6 +1,6 @@
 include(backend.pri)
 
-INCLUDEPATH += ../../../Common/System ../../../Common/Multimedia
+INCLUDEPATH += $$PWD/../../Common/Multimedia
 
 INCLUDEPATH += \
     $$PWD/welle-lf
@@ -17,4 +17,4 @@ HEADERS += \
     $$PWD/welle-lf/radiocontroller.h \
     $$PWD/welle-lf/radioreceiverfm.h
 
-LIBS += -L../../../CommonLibs/debug -lSystem -lMultimedia
+LIBS += -L$$PWD/../../CommonLibs/debug -lSystem -lMultimedia

@@ -1,6 +1,7 @@
 #include <iostream>
 #include "radiocontroller.h"
 #include "audio/audioplayer.h"
+#include "threads/threadutils.h"
 
 using namespace std;
 
@@ -66,6 +67,20 @@ int main()
         else if (line == "prev")
         {
             rc.FmSeekPrev();
+        }
+        else if (line == "stop")
+        {
+            rc.stop();
+        }
+        else if (line == "test")
+        {
+            while (true)
+            {
+                rc.play(96000000);
+                LF::threads::SleepSec(1);
+                rc.stop();
+                LF::threads::SleepSec(1);
+            }
         }
         else
         {

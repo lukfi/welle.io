@@ -143,19 +143,32 @@ bool CRTL_SDR::restart(void)
 {
     int ret;
 
-    if(rtlsdrUnplugged) {
+    if (rtlsdrUnplugged)
+    {
+        SWAR("Unplugged");
         return false;
     }
 
     if (rtlsdrRunning) {
+        SUCC("YES");
         return true;
+    }
+    else
+    {
+        SUCC("NO");
     }
 
     sampleBuffer.FlushRingBuffer();
     spectrumSampleBuffer.FlushRingBuffer();
-    ret = rtlsdr_reset_buffer(device);
+    {
+        std::lock_guard<std::mutex> lock(mRtlSdrMutex);
+        ret = rtlsdr_reset_buffer(device);
+    }
     if (ret < 0)
+    {
+        SWAR("Failed to reset buffer");
         return false;
+    }
 
     SDEB("Set central freq: %d", lastFrequency + frequencyOffset);
     {
@@ -492,10 +505,13 @@ void CRTL_SDR::rtlsdr_read_async_wrapper()
                       (rtlsdr_read_async_cb_t)&CRTL_SDR::RTLSDRCallBack,
                       (void*)this, 0, READLEN_DEFAULT);
 
-    if(rtlsdrRunning)
+    if (rtlsdrRunning)
+    {
+        SERR("RTL-SDR is unplugged.");
         radioController.onMessage(message_level_t::Error, "RTL-SDR is unplugged.");
+        rtlsdrUnplugged = true;
+    }
 
-    rtlsdrUnplugged = true;
     rtlsdrRunning = false;
     std::clog << "End RTLSDR thread" << std::endl;
 }

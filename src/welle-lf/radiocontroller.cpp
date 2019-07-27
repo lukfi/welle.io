@@ -178,13 +178,15 @@ void RadioController::playfm(int fmFreq, bool scan)
 
 void RadioController::stop()
 {
-    if (mDevice) {
+    EXECUTE_IN_THREAD(&mRadioControllerThread, &RadioController::stop, this);
+    if (mDevice)
+    {
         mDevice->stop();
     }
-    else
-        throw std::runtime_error("device is null in file " + std::string(__FILE__) +":"+ std::to_string(__LINE__));
+    //else
+    //    throw std::runtime_error("device is null in file " + std::string(__FILE__) +":"+ std::to_string(__LINE__));
 
-    //audio.reset();
+    mRadioReceiver = nullptr;
     labelTimer.Stop();
 }
 

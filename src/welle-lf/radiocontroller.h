@@ -105,8 +105,6 @@ private:
 
     std::unique_ptr<RadioReceiverFM> mRadioReceiver;
     LF::audio::AudioBuffer* mAudioBuffer { nullptr };
-//    RingBuffer<int16_t> audioBuffer;
-//    CAudio mAudio;
     std::mutex impulseResponseBufferMutex;
     std::vector<float> impulseResponseBuffer;
     std::mutex nullSymbolBufferMutex;
