@@ -84,6 +84,10 @@ CGUIHelper::CGUIHelper(CRadioController *RadioController, QObject *parent)
 
     trayIcon->setIcon(QIcon(":/icon/icon.png"));
     trayIcon->show();
+
+    connect(trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
+            this, SLOT(showWindow(QSystemTrayIcon::ActivationReason)));
+
 #endif
 
     CDebugOutput::setCGUI(this);
@@ -91,6 +95,9 @@ CGUIHelper::CGUIHelper(CRadioController *RadioController, QObject *parent)
 
 CGUIHelper::~CGUIHelper()
 {
+    // Avoid segmentation fault if a debug message should be displayed after deleting
+    CDebugOutput::setCGUI(nullptr);
+
     qDebug() << "GUI:" <<  "deleting radioInterface";
 }
 
@@ -199,6 +206,14 @@ void CGUIHelper::showInfoMessage(QString Text)
     trayIcon->showMessage(QCoreApplication::applicationName(), Text, QIcon(":/icon.png"), 5000);
 #else
     (void)Text;
+#endif
+}
+
+void CGUIHelper::showWindow(QSystemTrayIcon::ActivationReason r)
+{
+#ifndef QT_NO_SYSTEMTRAYICON
+    if (r == QSystemTrayIcon::Trigger)
+        emit restoreWindow();
 #endif
 }
 
@@ -523,8 +538,24 @@ void CGUIHelper::openRtlTcp(QString IpAddress, int IpPort, bool force)
     radioController->openDevice(CDeviceID::RTL_TCP, force, IpAddress, IpPort);
 }
 
-void CGUIHelper::openRawFile(QString filename, QString fileFormat)
+void CGUIHelper::openRawFile(QString fileFormat)
 {
+#ifdef __ANDROID__
+    // Open file selection dialog
+    const auto ACTION_OPEN_DOCUMENT = QAndroidJniObject::getStaticObjectField<jstring>("android/content/Intent", "ACTION_OPEN_DOCUMENT");
+    QAndroidJniObject intent("android/content/Intent", "(Ljava/lang/String;)V", ACTION_OPEN_DOCUMENT.object());
+    const auto CATEGORY_OPENABLE = QAndroidJniObject::getStaticObjectField<jstring>("android/content/Intent", "CATEGORY_OPENABLE");
+    intent.callObjectMethod("addCategory", "(Ljava/lang/String;)Landroid/content/Intent;", CATEGORY_OPENABLE.object());
+    intent.callObjectMethod("setType", "(Ljava/lang/String;)Landroid/content/Intent;", QAndroidJniObject::fromString(QStringLiteral("*/*")).object());
+
+    // Open file dialog
+    activityResultReceiver = new FileActivityResultReceiver(this, fileFormat);
+    QtAndroid::startActivity( intent.object<jobject>(), 12, activityResultReceiver);
+#endif
+}
+
+void CGUIHelper::openRawFile(QString filename, QString fileFormat)
+{   
     radioController->openDevice(CDeviceID::RAWFILE, true, filename, fileFormat);
 }
 
@@ -583,3 +614,22 @@ void CGUIHelper::addTranslator(QString Language, QObject *obj)
     QQmlEngine *engine = currentContext->engine();
     engine->retranslate();
 }
+
+#ifdef __ANDROID__
+void FileActivityResultReceiver::handleActivityResult(int receiverRequestCode, int resultCode, const QAndroidJniObject &intent) {
+    if (!intent.isValid()) {
+        return;
+    }
+
+    const auto uri = intent.callObjectMethod("getData", "()Landroid/net/Uri;");
+    if (!uri.isValid()) {
+        return;
+    }
+
+    const auto scheme = uri.callObjectMethod("getScheme", "()Ljava/lang/String;");
+    if (scheme.toString() == QLatin1String("content")) {
+        const auto tmpFile = uri.callObjectMethod("toString", "()Ljava/lang/String;");
+        guiHelper->openRawFile(QString(tmpFile.toString()), fileFormat);
+    }
+}
+#endif

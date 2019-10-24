@@ -56,6 +56,7 @@ GridLayout {
         }
 
         // Create new view
+        console.debug("Creating component: " + path)
         var component = Qt.createComponent(path);
         var object = component.createObject(gridLayout);
         object.sourcePath = path; // Save path inside component to make a saving possible
@@ -131,7 +132,8 @@ GridLayout {
     }
 
     function __deserialize() {
-        if(serialized != "" && serialized != "[\"\"]") {
+        //console.debug("Serialized components: " + serialized)
+        if(serialized != "" && serialized != "[\"\"]"  && serialized != "[[\"\"],[0],[0]]") {
             var tmp = JSON.parse(serialized)
 
             var pathList = tmp[0]
@@ -155,8 +157,8 @@ GridLayout {
     }
 
     function __initComponents() {
-        addComponent("qrc:/QML/RadioView.qml", -1)
-        addComponent("qrc:/QML/MotView.qml", -1)
+        addComponent("qrc:/QML/RadioView.qml", -1, -1)
+        addComponent("qrc:/QML/MotView.qml", -1, -1)
     }
 
     function __checkCell(row, column) {

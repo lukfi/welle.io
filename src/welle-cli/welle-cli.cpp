@@ -196,9 +196,14 @@ class RadioInterface : public RadioControllerInterface {
                 {"month", dateTime.month},
                 {"day", dateTime.day},
                 {"hour", dateTime.hour},
-                {"minutes", dateTime.minutes}
+                {"minutes", dateTime.minutes},
+                {"seconds", dateTime.seconds}
             };
-            cout << j << endl;
+
+            if (last_date_time != j) {
+                cout << j << endl;
+                last_date_time = j;
+            }
         }
 
         virtual void onFIBDecodeSuccess(bool crcCheckOk, const uint8_t* fib) override {
@@ -250,6 +255,7 @@ class RadioInterface : public RadioControllerInterface {
             cout << j << endl;
         }
 
+        json last_date_time;
         bool synced = false;
         FILE* fic_fd = nullptr;
 };
@@ -470,6 +476,14 @@ int main(int argc, char **argv)
         while (not ri.synced) {
             this_thread::sleep_for(chrono::seconds(3));
         }
+
+        cerr << "Wait for service list" << endl;
+        while (rx.getServiceList().empty()) {
+            this_thread::sleep_for(chrono::seconds(1));
+        }
+
+        // Wait an additional 3 seconds so that the receiver can complete the service list
+        this_thread::sleep_for(chrono::seconds(3));
 
         if (options.decode_all_programmes) {
             using SId_t = uint32_t;

@@ -125,11 +125,14 @@ CRTL_SDR::~CRTL_SDR(void)
 
 void CRTL_SDR::setFrequency(int frequency)
 {
+    stop();
+    rtlsdrUnplugged = false;
     lastFrequency = frequency;
     int ret = -1;
     {
         std::lock_guard<std::mutex> lock(mRtlSdrMutex);
         ret = rtlsdr_set_center_freq(device, frequency + frequencyOffset);
+        restart(); // ? LF# merged - test it
     }
     //SDEB("Freq set: %d == %d %s(%d)", frequency + frequencyOffset, rtlsdr_get_center_freq(device), (ret == 0) ? "OK" : "FAIL", ret);
 }

@@ -38,23 +38,24 @@
 static const int EXTIO_NS = 8192;
 static const int EXTIO_BASE_TYPE_SIZE = sizeof(float);
 
-CAirspy::CAirspy() :
+CAirspy::CAirspy(RadioControllerInterface &radioController) :
+    radioController(radioController),
     SampleBuffer(256 * 1024),
     SpectrumSampleBuffer(8192)
 {
-    std::clog << "Airspy:" << "Open airspy" << std::endl;
+    std::clog << "Airspy: " << "Open airspy" << std::endl;
 
     device = {};
 
     int result = airspy_init();
     if (result != AIRSPY_SUCCESS) {
-        std::clog  << "Airspy:" << "airspy_init () failed:" << airspy_error_name((airspy_error)result) << "(" << result << ")" << std::endl;
+        std::clog  << "Airspy: " << "airspy_init () failed: " << airspy_error_name((airspy_error)result) << "(" << result << ")" << std::endl;
         throw 0;
     }
 
     result = airspy_open(&device);
     if (result != AIRSPY_SUCCESS) {
-        std::clog  << "Airspy:" << "airpsy_open () failed:" << airspy_error_name((airspy_error)result) << "(" << result << ")" << std::endl;
+        std::clog  << "Airspy: " << "airpsy_open () failed: " << airspy_error_name((airspy_error)result) << "(" << result << ")" << std::endl;
         throw 0;
     }
 
@@ -62,7 +63,7 @@ CAirspy::CAirspy() :
 
     result = airspy_set_samplerate(device, AIRSPY_SAMPLERATE);
     if (result != AIRSPY_SUCCESS) {
-        std::clog  << "Airspy:" <<"airspy_set_samplerate() failed:" << airspy_error_name((airspy_error)result) << "(" << result << ")" << std::endl;
+        std::clog  << "Airspy: " <<"airspy_set_samplerate() failed: " << airspy_error_name((airspy_error)result) << "(" << result << ")" << std::endl;
         throw 0;
     }
 
@@ -84,12 +85,12 @@ CAirspy::~CAirspy(void)
     if (device) {
         int result = airspy_stop_rx(device);
         if (result != AIRSPY_SUCCESS) {
-            std::clog  << "Airspy: airspy_stop_rx () failed:" << airspy_error_name((airspy_error)result) << "(" << result << ")" << std::endl;
+            std::clog  << "Airspy: airspy_stop_rx () failed: " << airspy_error_name((airspy_error)result) << "(" << result << ")" << std::endl;
         }
 
         result = airspy_close(device);
         if (result != AIRSPY_SUCCESS) {
-            std::clog  << "Airspy: airspy_close () failed:" << airspy_error_name((airspy_error)result) << "(" << result << ")" << std::endl;
+            std::clog  << "Airspy: airspy_close () failed: " << airspy_error_name((airspy_error)result) << "(" << result << ")" << std::endl;
         }
     }
 
@@ -102,7 +103,7 @@ void CAirspy::setFrequency(int nf)
     int result = airspy_set_freq(device, nf);
 
     if (result != AIRSPY_SUCCESS) {
-        std::clog  << "Airspy: airspy_set_freq() failed:" << airspy_error_name((airspy_error)result) << "(" << result << ")" << std::endl;
+        std::clog  << "Airspy: airspy_set_freq() failed: " << airspy_error_name((airspy_error)result) << "(" << result << ")" << std::endl;
     }
 }
 
@@ -121,13 +122,13 @@ bool CAirspy::restart(void)
     SpectrumSampleBuffer.FlushRingBuffer();
     result = airspy_set_sample_type(device, AIRSPY_SAMPLE_FLOAT32_IQ);
     if (result != AIRSPY_SUCCESS) {
-        std::clog  << "Airspy: airspy_set_sample_type () failed:" << airspy_error_name((airspy_error)result) << "(" << result << ")" << std::endl;
+        std::clog  << "Airspy: airspy_set_sample_type () failed: " << airspy_error_name((airspy_error)result) << "(" << result << ")" << std::endl;
         return false;
     }
 
     result = airspy_start_rx(device, (airspy_sample_block_cb_fn)callback, this);
     if (result != AIRSPY_SUCCESS) {
-        std::clog  << "Airspy: airspy_start_rx () failed:" << airspy_error_name((airspy_error)result) << "(" << result << ")" << std::endl;
+        std::clog  << "Airspy: airspy_start_rx () failed: " << airspy_error_name((airspy_error)result) << "(" << result << ")" << std::endl;
         return false;
     }
 
@@ -137,6 +138,15 @@ bool CAirspy::restart(void)
 
 bool CAirspy::is_ok()
 {
+    // Check if airspy is still connected
+    airspy_error status =  (airspy_error) airspy_is_streaming(device);
+    if(status != AIRSPY_TRUE && running == true) {
+        std::clog << "Airspy: airspy is not working. Maybe it is unplugged. Code: " << status <<  "running" << running << std::endl;
+        radioController.onMessage(message_level_t::Error, "airspy is unplugged.");
+
+        stop();
+    }
+
     return running;
 }
 
@@ -147,7 +157,7 @@ void CAirspy::stop(void)
     int result = airspy_stop_rx(device);
 
     if (result != AIRSPY_SUCCESS) {
-        std::clog  << "Airspy: airspy_stop_rx() failed:" << airspy_error_name((airspy_error)result) << "(" << result << ")" << std::endl;
+        std::clog  << "Airspy: airspy_stop_rx() failed: " << airspy_error_name((airspy_error)result) << "(" << result << ")" << std::endl;
     }
     running = false;
 }
@@ -184,24 +194,25 @@ int CAirspy::data_available(const DSPCOMPLEX* buf, size_t num_samples)
         const auto z = 0.5f * (sbuf[2*i] + sbuf[2*i+1]);
         temp[i] = z;
 
-        if (sw_agc and (num_frames % 200) == 0) {
+        if (sw_agc and (num_frames % 10) == 0) {
             if (norm(z) > maxnorm) {
                 maxnorm = norm(z);
             }
         }
     }
 
-    if (sw_agc and (num_frames % 200) == 0) {
+    if (sw_agc and (num_frames % 10) == 0) {
         const float maxampl = sqrt(maxnorm);
+        //  std::clog  << "Airspy: maxampl: " << maxampl << std::endl;
 
         if (maxampl > 0.2f) {
-            const int newgain = currentLinearityGain--;
+            const int newgain = currentLinearityGain - 1;
             if (newgain >= AIRSPY_GAIN_MIN) {
                 setGain(newgain);
             }
         }
         else if (maxampl < 0.02f) {
-            const int newgain = currentLinearityGain++;
+             const int newgain = currentLinearityGain + 1;
             if (newgain <= AIRSPY_GAIN_MAX) {
                 setGain(newgain);
             }
@@ -252,7 +263,7 @@ void CAirspy::setAgc(bool agc)
     if (not agc) {
         int result = airspy_set_linearity_gain(device, currentLinearityGain);
         if (result != AIRSPY_SUCCESS)
-            std::clog  << "Airspy: airspy_set_mixer_agc() failed:" << airspy_error_name((airspy_error)result) << "(" << result << ")" << std::endl;
+            std::clog  << "Airspy: airspy_set_mixer_agc() failed: " << airspy_error_name((airspy_error)result) << "(" << result << ")" << std::endl;
 
     }
 
@@ -302,11 +313,12 @@ float CAirspy::getGain() const
 
 float CAirspy::setGain(int gain)
 {
+    std::clog  << "Airspy: setgain: " << gain << std::endl;
     currentLinearityGain = gain;
 
     int result = airspy_set_linearity_gain(device, currentLinearityGain);
     if (result != AIRSPY_SUCCESS)
-        std::clog  << "Airspy: airspy_set_mixer_agc() failed:" << airspy_error_name((airspy_error)result) << "(" << result << ")" << std::endl;
+        std::clog  << "Airspy: airspy_set_mixer_agc() failed: " << airspy_error_name((airspy_error)result) << "(" << result << ")" << std::endl;
 
     return currentLinearityGain;
 }
