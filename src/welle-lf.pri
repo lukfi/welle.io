@@ -20,5 +20,5 @@ HEADERS += \
 LIBS += -L$$PWD/../../CommonLibs/debug -lSystem -lMultimedia
 
 unix {
-LIBS += -pthread -lpulse -lpulse-simple -lasound
+LIBS += -pthread -lpulse -lpulse-simple -lasound -latomic
 }
