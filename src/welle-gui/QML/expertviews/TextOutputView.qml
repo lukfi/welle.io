@@ -10,8 +10,26 @@ import "../components"
 ViewBaseFrame {
     labelText: qsTr("Console Output")
 
+    Timer {
+        interval: 1000; // run every 1 s
+        running: true;
+        repeat: true
+        onTriggered: {
+            // Count total number of lines ("\n")
+            var lines = (textField.text.match(/\n/g)|| []).length
+
+            // Remove first line, keep the last 100 lines
+            if(lines > 100 ) {
+                var j = 0
+                while (textField.text.charAt(j) !== '\n') {
+                    j++
+                }
+                textField.text = textField.text.slice(j+1)
+            }
+        }
+    }
+
     content:  Rectangle {
-        color: "black"
         anchors.fill: parent
         Flickable {
             id: flick
@@ -22,24 +40,13 @@ ViewBaseFrame {
                 id: textField
                 font.family: "Monospace"
                 font.pixelSize: Units.em(0.9)
+                background: Rectangle { color: "black" }
                 color: "white"
                 width: flick.width
                 wrapMode: TextEdit.Wrap
                 readOnly: true
 
                 onLineCountChanged: {
-                    // Count total number of lines ("\n")
-                    var lines = (text.match(/\n/g)|| []).length
-
-                    // Remove first line, keep tha last 100 lines
-                    if(lines > 100 ) {
-                        var j = 0
-                        while (text.charAt(j) !== '\n') {
-                            j++
-                        }
-                        text = text.slice(j+1)
-                    }
-
                     // Scroll to the end
                     cursorPosition = length
                 }
@@ -54,6 +61,13 @@ ViewBaseFrame {
 
         onNewDebugOutput: {
             textField.append(text)
+        }
+    }
+
+    Component.onCompleted: {
+        if(Qt.platform.os == "android") {
+            infoMessagePopup.text = qsTr("Warning: The console view can be slow down the complete app!");
+            infoMessagePopup.open();
         }
     }
 }

@@ -17,9 +17,9 @@ ListModel {
         serialize()
     }
 
-    function removeStation(sId) {
+    function removeStation(sId, channel) {
         for(var i=0; i<count; i++)
-            if(get(i).stationSId === sId) {
+            if(get(i).stationSId === sId && get(i).channelName === channel) {
                 remove(i)
                 serialize()
                 return
@@ -31,9 +31,9 @@ ListModel {
         serialize()
     }
 
-    function setFavorit(sId, favorit) {
+    function setFavorit(sId, channel, favorit) {
         for(var i=0; i<count; i++)
-            if(get(i).stationSId === sId) {
+            if(get(i).stationSId === sId && get(i).channelName === channel) {
                 get(i).favorit = favorit
                 serialize()
                 return
@@ -45,7 +45,7 @@ ListModel {
         for(var n=count; n>1; --n) {
             for(var i=0; i<n-1; ++i) {
                 // Sort in alphabetical order
-                if(get(i).stationName.localeCompare(get(i+1).stationName) === 1)
+                if(get(i).stationName.localeCompare(get(i+1).stationName) >= 1)
                     move(i,i+1,1)
             }
         }

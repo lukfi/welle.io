@@ -188,6 +188,11 @@ class RadioInterface : public RadioControllerInterface {
             cout << "Ensemble name id: " << hex << eId << dec << endl;
         }
 
+        virtual void onSetEnsembleLabel(DabLabel& label) override
+        {
+            cout << "Ensemble label: " << label.utf8_label() << endl;
+        }
+
         virtual void onDateTimeUpdate(const dab_date_time_t& dateTime) override
         {
             json j;
@@ -196,9 +201,14 @@ class RadioInterface : public RadioControllerInterface {
                 {"month", dateTime.month},
                 {"day", dateTime.day},
                 {"hour", dateTime.hour},
-                {"minutes", dateTime.minutes}
+                {"minutes", dateTime.minutes},
+                {"seconds", dateTime.seconds}
             };
-            cout << j << endl;
+
+            if (last_date_time != j) {
+                cout << j << endl;
+                last_date_time = j;
+            }
         }
 
         virtual void onFIBDecodeSuccess(bool crcCheckOk, const uint8_t* fib) override {
@@ -225,14 +235,20 @@ class RadioInterface : public RadioControllerInterface {
         virtual void onNewImpulseResponse(std::vector<float>&& data) override { (void)data; }
         virtual void onNewNullSymbol(std::vector<DSPCOMPLEX>&& data) override { (void)data; }
         virtual void onConstellationPoints(std::vector<DSPCOMPLEX>&& data) override { (void)data; }
-        virtual void onMessage(message_level_t level, const std::string& text) override
+        virtual void onMessage(message_level_t level, const std::string& text, const std::string& text2 = std::string()) override
         {
+            std::string fullText;
+            if (text2.empty())
+                fullText = text;
+            else
+                fullText = text + text2;
+
             switch (level) {
                 case message_level_t::Information:
-                    cerr << "Info: " << text << endl;
+                    cerr << "Info: " << fullText << endl;
                     break;
                 case message_level_t::Error:
-                    cerr << "Error: " << text << endl;
+                    cerr << "Error: " << fullText << endl;
                     break;
             }
         }
@@ -250,11 +266,13 @@ class RadioInterface : public RadioControllerInterface {
             cout << j << endl;
         }
 
+        json last_date_time;
         bool synced = false;
         FILE* fic_fd = nullptr;
 };
 
 struct options_t {
+    string soapySDRDriverArgs = "";
     string antenna = "";
     int gain = -1;
     string channel = "10B";
@@ -304,6 +322,7 @@ static void usage()
         "Backend and input options" << endl <<
         " -u      disable coarse corrector, for receivers who have a low frequency offset." << endl <<
         " -g GAIN set input gain to GAIN or -1 for auto gain." << endl <<
+        " -s ARGS SoapySDR Driver arguments." << endl <<
         " -A ANT  set input antenna to ANT (for SoapySDR input only)." << endl <<
         " -T      disable TII decoding to reduce CPU usage." << endl <<
         endl <<
@@ -321,7 +340,7 @@ options_t parse_cmdline(int argc, char **argv)
     options.rro.decodeTII = true;
 
     int opt;
-    while ((opt = getopt(argc, argv, "A:c:C:dDf:g:hp:PTt:w:u")) != -1) {
+    while ((opt = getopt(argc, argv, "A:c:C:dDf:g:hp:PTs:t:w:u")) != -1) {
         switch (opt) {
             case 'A':
                 options.antenna = optarg;
@@ -353,6 +372,9 @@ options_t parse_cmdline(int argc, char **argv)
             case 'h':
                 usage();
                 exit(1);
+            case 's':
+                options.soapySDRDriverArgs = optarg;
+                break;
             case 't':
                 options.tests.push_back(std::atoi(optarg));
                 break;
@@ -424,6 +446,10 @@ int main(int argc, char **argv)
     if (not options.antenna.empty() and in->getID() == CDeviceID::SOAPYSDR) {
         dynamic_cast<CSoapySdr*>(in.get())->setDeviceParam(DeviceParam::SoapySDRAntenna, options.antenna);
     }
+
+    if (not options.soapySDRDriverArgs.empty() and in->getID() == CDeviceID::SOAPYSDR) {
+        dynamic_cast<CSoapySdr*>(in.get())->setDeviceParam(DeviceParam::SoapySDRDriverArgs, options.soapySDRDriverArgs);
+    }
 #endif
 
     auto freq = channels.getFrequency(options.channel);
@@ -470,6 +496,14 @@ int main(int argc, char **argv)
         while (not ri.synced) {
             this_thread::sleep_for(chrono::seconds(3));
         }
+
+        cerr << "Wait for service list" << endl;
+        while (rx.getServiceList().empty()) {
+            this_thread::sleep_for(chrono::seconds(1));
+        }
+
+        // Wait an additional 3 seconds so that the receiver can complete the service list
+        this_thread::sleep_for(chrono::seconds(3));
 
         if (options.decode_all_programmes) {
             using SId_t = uint32_t;

@@ -19,13 +19,19 @@ Item{
             id: nameView
             font.pixelSize: TextStyle.textStandartSize
             font.family: TextStyle.textFont
-            color: TextStyle.textColor
+            //color: TextStyle.textColor
         }
         Text{
             id: textView
             font.pixelSize: TextStyle.textStandartSize
             font.family: TextStyle.textFont
-            color: TextStyle.textColor
+            //color: TextStyle.textColor
+            verticalAlignment: Text.AlignVCenter
+            Layout.maximumWidth: (parent.parent.parent.isServiceDetailsRawLayout == true) ? 
+                parent.parent.parent.parent.parent.width - nameView.width - 16 :
+                parent.parent.parent.width - nameView.width
+            fontSizeMode: Text.Fit
+            minimumPixelSize: 8;
         }
     }
 }

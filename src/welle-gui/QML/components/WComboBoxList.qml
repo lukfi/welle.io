@@ -18,7 +18,7 @@ ComboBox {
     delegate: ItemDelegate {
         width: comboBox.width
         contentItem: TextStandart {
-            text: modelData
+            text: label;
             elide: Text.ElideRight
             verticalAlignment: Text.AlignVCenter
         }
@@ -31,8 +31,8 @@ ComboBox {
 
     onModelChanged: {
         textMetrics.font = comboBox.font
-        for(var i = 0; i < model.length; i++){
-            textMetrics.text = model[i]
+        for(var i = 0; i < model.count; i++){
+            textMetrics.text = model.get(i).label
             modelWidth = Math.max(textMetrics.width, modelWidth)
         }
     }

@@ -39,12 +39,19 @@ SettingSection {
                 text: qsTr("Open RAW file")
                 Layout.fillWidth: true
                 onClicked: {
-                    fileDialog.open()
+                    if(Qt.platform.os == "android") {
+                        filePath.text = qsTr("Currently shown under Android")
+                        __openDevice()
+                    }
+                    else {
+                        fileDialog.open()
+                    }
                 }
             }
 
             WComboBox {
                 id: fileFormat
+                sizeToContents: true
                 model: [ "auto", "u8", "s8", "s16le", "s16be", "cf32"];
             }
         }
@@ -75,7 +82,10 @@ SettingSection {
     }
 
     function __openDevice() {
-        guiHelper.openRawFile(filePath.text, fileFormat.currentText)
+        if(Qt.platform.os == "android")
+            guiHelper.openRawFile(fileFormat.currentText)
+        else
+            guiHelper.openRawFile(filePath.text, fileFormat.currentText)
     }
 
     function __getPath(urlString) {

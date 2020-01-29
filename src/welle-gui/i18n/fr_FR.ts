@@ -1,843 +1,1608 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS>
-<TS version="2.1" language="de_DE">
+<TS version="2.1" language="fr_FR">
+<context>
+    <name>ActivityResultReceiver</name>
+    <message>
+        <location filename="../android_rtl_sdr.cpp" line="+170"/>
+        <source>Android RTL-SDR driver is not installed</source>
+        <translation>Le pilote RTL-SDR Android n&apos;est pas installé</translation>
+    </message>
+</context>
+<context>
+    <name>AirspySettings</name>
+    <message>
+        <location filename="../QML/settingpages/AirspySettings.qml" line="+12"/>
+        <source>Airspy settings</source>
+        <translation>Paramètres Airspy</translation>
+    </message>
+    <message>
+        <location line="+15"/>
+        <source>Enable bias tee</source>
+        <translation>Activer le té de polarisation</translation>
+    </message>
+</context>
 <context>
     <name>CAndroid_RTL_SDR</name>
     <message>
-        <source>Android RTL-SDR driver is not installed</source>
-        <translation type="vanished">Android RTL-SDR Treiber ist nicht installiert</translation>
+        <location filename="../android_rtl_sdr.cpp" line="-41"/>
+        <source>OK</source>
+        <translation></translation>
     </message>
     <message>
-        <source>Would you like to install it? Start welle.io again after install.</source>
-        <translation type="vanished">Soll er installiert werden? welle.io muss nach der Treiberinstallation neu gestartet werden.</translation>
+        <location line="+1"/>
+        <source>Cancel</source>
+        <translation>Annuler</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Android RTL-SDR driver is not installed. Do you would like to install it? After install start welle.io again.</source>
+        <translation>Le pilote RTL-SDR Android n&apos;est pas installé. Voulez-vous l&apos;installer ? Redémarrez welle.io après l&apos;installation.</translation>
     </message>
 </context>
 <context>
-    <name>CDABConstants</name>
+    <name>CGUIHelper</name>
     <message>
-        <location filename="../src/DabConstants.cpp" line="37"/>
-        <source>none</source>
-        <translation>Aucun</translation>
+        <location filename="../gui_helper.cpp" line="+64"/>
+        <location line="+565"/>
+        <source>Mi&amp;nimize</source>
+        <translation>Mi&amp;nimiser</translation>
     </message>
     <message>
-        <location filename="../src/DabConstants.cpp" line="38"/>
-        <source>News</source>
-        <translation>Actualités</translation>
+        <location line="-562"/>
+        <location line="+563"/>
+        <source>Ma&amp;ximize</source>
+        <translation>Ma&amp;ximiser</translation>
     </message>
     <message>
-        <location filename="../src/DabConstants.cpp" line="39"/>
-        <source>Current Affairs</source>
-        <translation>Magazine d&apos;affaires</translation>
+        <location line="-560"/>
+        <location line="+561"/>
+        <source>&amp;Restore</source>
+        <translation>&amp;Restaurer</translation>
     </message>
     <message>
-        <location filename="../src/DabConstants.cpp" line="40"/>
-        <source>Information</source>
-        <translation>Informations</translation>
+        <location line="-558"/>
+        <location line="+559"/>
+        <source>&amp;Quit</source>
+        <translation>&amp;Quitter</translation>
     </message>
     <message>
-        <location filename="../src/DabConstants.cpp" line="41"/>
-        <source>Sport</source>
-        <translation>Sport</translation>
-    </message>
-    <message>
-        <location filename="../src/DabConstants.cpp" line="42"/>
-        <source>Education</source>
-        <translation>Education</translation>
-    </message>
-    <message>
-        <location filename="../src/DabConstants.cpp" line="43"/>
-        <source>Drama</source>
-        <translation>Fiction</translation>
-    </message>
-    <message>
-        <location filename="../src/DabConstants.cpp" line="44"/>
-        <source>Arts</source>
-        <translation>Arts</translation>
-    </message>
-    <message>
-        <location filename="../src/DabConstants.cpp" line="45"/>
-        <source>Science</source>
-        <translation>Science</translation>
-    </message>
-    <message>
-        <location filename="../src/DabConstants.cpp" line="46"/>
-        <source>Talk</source>
-        <translation>Débats</translation>
-    </message>
-    <message>
-        <location filename="../src/DabConstants.cpp" line="47"/>
-        <source>Pop Music</source>
-        <translation>Pop Music</translation>
-    </message>
-    <message>
-        <location filename="../src/DabConstants.cpp" line="48"/>
-        <source>Rock Music</source>
-        <translation>Rock Music</translation>
-    </message>
-    <message>
-        <location filename="../src/DabConstants.cpp" line="49"/>
-        <source>Easy Listening</source>
-        <translation>Musique variée</translation>
-    </message>
-    <message>
-        <location filename="../src/DabConstants.cpp" line="50"/>
-        <source>Light classical</source>
-        <translation>Classique</translation>
-    </message>
-    <message>
-        <location filename="../src/DabConstants.cpp" line="51"/>
-        <source>Classical Music</source>
-        <translation>Musique classique</translation>
-    </message>
-    <message>
-        <location filename="../src/DabConstants.cpp" line="52"/>
-        <source>Other Music</source>
-        <translation>Autres musiques</translation>
-    </message>
-    <message>
-        <location filename="../src/DabConstants.cpp" line="53"/>
-        <source>Weather</source>
-        <translation>Météo</translation>
-    </message>
-    <message>
-        <location filename="../src/DabConstants.cpp" line="54"/>
-        <source>Finance</source>
-        <translation>Economie</translation>
-    </message>
-    <message>
-        <location filename="../src/DabConstants.cpp" line="55"/>
-        <source>Children&apos;s</source>
-        <translation>Enfants</translation>
-    </message>
-    <message>
-        <location filename="../src/DabConstants.cpp" line="56"/>
-        <source>Factual</source>
-        <translation>Société</translation>
-    </message>
-    <message>
-        <location filename="../src/DabConstants.cpp" line="57"/>
-        <source>Religion</source>
-        <translation>Religion</translation>
-    </message>
-    <message>
-        <location filename="../src/DabConstants.cpp" line="58"/>
-        <source>Phone In</source>
-        <translation>Débats</translation>
-    </message>
-    <message>
-        <location filename="../src/DabConstants.cpp" line="59"/>
-        <source>Travel</source>
-        <translation>Voyage</translation>
-    </message>
-    <message>
-        <location filename="../src/DabConstants.cpp" line="60"/>
-        <source>Leisure</source>
-        <translation>Loisirs</translation>
-    </message>
-    <message>
-        <location filename="../src/DabConstants.cpp" line="61"/>
-        <source>Jazz and Blues</source>
-        <translation>Jazz</translation>
-    </message>
-    <message>
-        <location filename="../src/DabConstants.cpp" line="62"/>
-        <source>Country Music</source>
-        <translation>Country</translation>
-    </message>
-    <message>
-        <location filename="../src/DabConstants.cpp" line="63"/>
-        <source>National Music</source>
-        <translation>Musiques du pays</translation>
-    </message>
-    <message>
-        <location filename="../src/DabConstants.cpp" line="64"/>
-        <source>Oldies Music</source>
-        <translation>Oldies</translation>
-    </message>
-    <message>
-        <location filename="../src/DabConstants.cpp" line="65"/>
-        <source>Folk Music</source>
-        <translation>Folk</translation>
-    </message>
-    <message>
-        <location filename="../src/DabConstants.cpp" line="66"/>
-        <source>entry 29 not used</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../src/DabConstants.cpp" line="67"/>
-        <source>entry 30 not used</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../src/DabConstants.cpp" line="68"/>
-        <source>entry 31 not used</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../src/DabConstants.cpp" line="82"/>
-        <source>Unknown</source>
-        <translation>Inconnu</translation>
-    </message>
-    <message>
-        <location filename="../src/DabConstants.cpp" line="83"/>
-        <source>Albanian</source>
-        <translation>Albanais</translation>
-    </message>
-    <message>
-        <location filename="../src/DabConstants.cpp" line="84"/>
-        <source>Breton</source>
-        <translation>Breton</translation>
-    </message>
-    <message>
-        <location filename="../src/DabConstants.cpp" line="85"/>
-        <source>Catalan</source>
-        <translation>Catalan</translation>
-    </message>
-    <message>
-        <location filename="../src/DabConstants.cpp" line="86"/>
-        <source>Croatian</source>
-        <translation>Croate</translation>
-    </message>
-    <message>
-        <location filename="../src/DabConstants.cpp" line="87"/>
-        <source>Welsh</source>
-        <translation>Gallois</translation>
-    </message>
-    <message>
-        <location filename="../src/DabConstants.cpp" line="88"/>
-        <source>Czech</source>
-        <translation>Tchèque</translation>
-    </message>
-    <message>
-        <location filename="../src/DabConstants.cpp" line="89"/>
-        <source>Danish</source>
-        <translation>Danois</translation>
-    </message>
-    <message>
-        <location filename="../src/DabConstants.cpp" line="90"/>
-        <source>German</source>
-        <translation>Allemand</translation>
-    </message>
-    <message>
-        <location filename="../src/DabConstants.cpp" line="91"/>
-        <source>English</source>
-        <translation>Anglais</translation>
-    </message>
-    <message>
-        <location filename="../src/DabConstants.cpp" line="92"/>
-        <source>Spanish</source>
-        <translation>Espagnol</translation>
-    </message>
-    <message>
-        <location filename="../src/DabConstants.cpp" line="93"/>
-        <source>Esperanto</source>
-        <translation>Esperanto</translation>
-    </message>
-    <message>
-        <location filename="../src/DabConstants.cpp" line="94"/>
-        <source>Estonian</source>
-        <translation>Estonien</translation>
-    </message>
-    <message>
-        <location filename="../src/DabConstants.cpp" line="95"/>
-        <source>Basque</source>
-        <translation>Basque</translation>
-    </message>
-    <message>
-        <location filename="../src/DabConstants.cpp" line="96"/>
-        <source>Faroese</source>
-        <translation>Féroïen</translation>
-    </message>
-    <message>
-        <location filename="../src/DabConstants.cpp" line="97"/>
-        <source>French</source>
-        <translation>Französisch</translation>
-    </message>
-    <message>
-        <location filename="../src/DabConstants.cpp" line="98"/>
-        <source>Frisian</source>
-        <translation>Friesisch</translation>
-    </message>
-    <message>
-        <location filename="../src/DabConstants.cpp" line="99"/>
-        <source>Irish</source>
-        <translation>Irisch</translation>
-    </message>
-    <message>
-        <location filename="../src/DabConstants.cpp" line="100"/>
-        <source>Gaelic</source>
-        <translation>Gaelique</translation>
-    </message>
-    <message>
-        <location filename="../src/DabConstants.cpp" line="101"/>
-        <source>Galician</source>
-        <translation>Galicien</translation>
-    </message>
-    <message>
-        <location filename="../src/DabConstants.cpp" line="102"/>
-        <source>Icelandic</source>
-        <translation>Islandais</translation>
-    </message>
-    <message>
-        <location filename="../src/DabConstants.cpp" line="103"/>
-        <source>Italian</source>
-        <translation>Italien</translation>
-    </message>
-    <message>
-        <location filename="../src/DabConstants.cpp" line="104"/>
-        <source>Lappish</source>
-        <translation>Lapponais</translation>
-    </message>
-    <message>
-        <location filename="../src/DabConstants.cpp" line="105"/>
-        <source>Latin</source>
-        <translation>Latin</translation>
-    </message>
-    <message>
-        <location filename="../src/DabConstants.cpp" line="106"/>
-        <source>Latvian</source>
-        <translation>Lettonien</translation>
-    </message>
-    <message>
-        <location filename="../src/DabConstants.cpp" line="107"/>
-        <source>Luxembourgian</source>
-        <translation>Luxembourgeois</translation>
-    </message>
-    <message>
-        <location filename="../src/DabConstants.cpp" line="108"/>
-        <source>Lithuanian</source>
-        <translation>Lithuanien</translation>
-    </message>
-    <message>
-        <location filename="../src/DabConstants.cpp" line="109"/>
-        <source>Hungarian</source>
-        <translation>Hongrois</translation>
-    </message>
-    <message>
-        <location filename="../src/DabConstants.cpp" line="110"/>
-        <source>Maltese</source>
-        <translation>Maltais</translation>
-    </message>
-    <message>
-        <location filename="../src/DabConstants.cpp" line="111"/>
-        <source>Dutch</source>
-        <translation>Nééérlandais</translation>
-    </message>
-    <message>
-        <location filename="../src/DabConstants.cpp" line="112"/>
-        <source>Norwegian</source>
-        <translation>norvégien</translation>
-    </message>
-    <message>
-        <location filename="../src/DabConstants.cpp" line="113"/>
-        <source>Occitan</source>
-        <translation>Occitan</translation>
-    </message>
-    <message>
-        <location filename="../src/DabConstants.cpp" line="114"/>
-        <source>Polish</source>
-        <translation>Polonais</translation>
-    </message>
-    <message>
-        <location filename="../src/DabConstants.cpp" line="115"/>
-        <source>Portuguese</source>
-        <translation>Portugais</translation>
-    </message>
-    <message>
-        <location filename="../src/DabConstants.cpp" line="116"/>
-        <source>Romanian</source>
-        <translation>Roumain</translation>
-    </message>
-    <message>
-        <location filename="../src/DabConstants.cpp" line="117"/>
-        <source>Romansh</source>
-        <translation>Roman</translation>
-    </message>
-    <message>
-        <location filename="../src/DabConstants.cpp" line="118"/>
-        <source>Serbian</source>
-        <translation>Serbe</translation>
-    </message>
-    <message>
-        <location filename="../src/DabConstants.cpp" line="119"/>
-        <source>Slovak</source>
-        <translation>Slovaque</translation>
-    </message>
-    <message>
-        <location filename="../src/DabConstants.cpp" line="120"/>
-        <source>Slovene</source>
-        <translation>Slovenien</translation>
-    </message>
-    <message>
-        <location filename="../src/DabConstants.cpp" line="121"/>
-        <source>Finnish</source>
-        <translation>Finlandais</translation>
-    </message>
-    <message>
-        <location filename="../src/DabConstants.cpp" line="122"/>
-        <source>Swedish</source>
-        <translation>Suédois</translation>
-    </message>
-    <message>
-        <location filename="../src/DabConstants.cpp" line="123"/>
-        <source>Turkish</source>
-        <translation>Turc</translation>
-    </message>
-    <message>
-        <location filename="../src/DabConstants.cpp" line="124"/>
-        <source>Flemish</source>
-        <translation>Flamand</translation>
-    </message>
-    <message>
-        <location filename="../src/DabConstants.cpp" line="125"/>
-        <source>Walloon</source>
-        <translation>Wallon</translation>
-    </message>
-</context>
-<context>
-    <name>CGUI</name>
-    <message>
-        <location filename="../src/gui/CGUI.cpp" line="185"/>
-        <source>Station list is empty</source>
-        <translation>Liste des programmes vide</translation>
-    </message>
-    <message>
-        <location filename="../src/gui/CGUI.cpp" line="120"/>
+        <location line="-506"/>
         <source>version</source>
-        <translation>Version</translation>
+        <translation>version</translation>
     </message>
     <message>
-        <location filename="../src/gui/CGUI.cpp" line="121"/>
+        <location line="+1"/>
         <source>Git revision</source>
-        <translation>Git Revision</translation>
+        <translation>Révision Git</translation>
     </message>
     <message>
-        <location filename="../src/gui/CGUI.cpp" line="122"/>
+        <location line="+1"/>
         <source>Build on</source>
         <translation>Compilé le</translation>
     </message>
     <message>
-        <location filename="../src/gui/CGUI.cpp" line="123"/>
+        <location line="+1"/>
         <source>QT version</source>
         <translation>Version QT</translation>
+    </message>
+    <message>
+        <location line="+136"/>
+        <source>The program will keep running in the system tray. To terminate the program, choose &lt;b&gt;Quit&lt;/b&gt; in the context menu of the system tray entry.</source>
+        <translation>Le programme continue de tourner dans la boite à miniatures. Pour le terminer, choisir &quot;Quitter&quot; dans le menu contextuel de la boîte à miniatures.</translation>
+    </message>
+    <message>
+        <location line="+486"/>
+        <source> (unavailable, fallback to Default)</source>
+        <translation> (non disponible, utilise &quot;Default&quot; à la place)</translation>
+    </message>
+    <message>
+        <location line="+4"/>
+        <source>Style of system</source>
+        <translation>Style du système</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source> (Recommended)</source>
+        <translation> (Recommandé)</translation>
     </message>
 </context>
 <context>
     <name>CRadioController</name>
     <message>
-        <location filename="../src/CRadioController.cpp" line="88"/>
+        <location filename="../radio_controller.cpp" line="+593"/>
         <source>Unknown</source>
         <translation>Inconnu</translation>
     </message>
     <message>
-        <location filename="../src/CRadioController.cpp" line="94"/>
-        <location filename="../src/CRadioController.cpp" line="473"/>
+        <location line="-200"/>
+        <location line="+219"/>
         <source>No Station</source>
-        <translation>Pas de programme</translation>
+        <translation>Pas de station</translation>
     </message>
     <message>
-        <location filename="../src/CRadioController.cpp" line="438"/>
+        <location line="-466"/>
+        <source>Error while opening file </source>
+        <translation>Erreur à l&apos;ouverture du fichier </translation>
+    </message>
+    <message>
+        <location line="+210"/>
         <source>RAW File</source>
         <translation>Fichier RAW</translation>
     </message>
     <message>
-        <location filename="../src/CRadioController.cpp" line="450"/>
-        <location filename="../src/CRadioController.cpp" line="751"/>
+        <location line="+13"/>
+        <location line="+465"/>
         <source>Scanning</source>
         <translation>Recherche</translation>
     </message>
     <message>
-        <location filename="../src/CRadioController.cpp" line="452"/>
-        <location filename="../src/CRadioController.cpp" line="848"/>
+        <location line="-461"/>
+        <location line="+486"/>
         <source>Found channels</source>
-        <translation>Programmes trouvés</translation>
+        <translatorcomment>Contexte: nombre stations trouvées durant la recherche de stations en scannant tous les canaux. Donc c&apos;est bien &quot;station&quot; qu&apos;il faut mettre, et pas &quot;canal&quot;</translatorcomment>
+        <translation>Stations trouvées</translation>
     </message>
     <message>
-        <location filename="../src/CRadioController.cpp" line="821"/>
-        <source>Lost signal or bad signal quality, trying to find it again.</source>
-        <translation>Signal perdu ou de mauvaise qualité. Essayez une nouvelle recherche</translation>
+        <location line="-272"/>
+        <source>Playing last station</source>
+        <translation>Lecture de la dernière station</translation>
     </message>
     <message>
-        <location filename="../src/CRadioController.cpp" line="687"/>
+        <location line="+59"/>
         <source>Radio device is not ready or does not exist.</source>
-        <translation>Le récepteur n&apos;est pas prêt ou n&apos;a pas été trouvé</translation>
+        <translation>Le récepteur radio n&apos;est pas prêt ou n&apos;existe pas.</translation>
     </message>
     <message>
-        <location filename="../src/CRadioController.cpp" line="410"/>
-        <location filename="../src/CRadioController.cpp" line="718"/>
-        <source>Tuning</source>
-        <translation>Accord</translation>
-    </message>
-</context>
-<context>
-    <name>ChannelBrowser</name>
-    <message>
-        <location filename="../src/gui/QML/ChannelBrowser.qml" line="289"/>
-        <source></source>
-        <translation></translation>
+        <location filename="../../input/airspy_sdr.cpp" line="+152"/>
+        <source>airspy is unplugged.</source>
+        <translation>Airspay est débranché.</translation>
     </message>
     <message>
-        <location filename="../src/gui/QML/ChannelBrowser.qml" line="488"/>
-        <location filename="../src/gui/QML/ChannelBrowser.qml" line="658"/>
-        <source>Found channels</source>
-        <translation>Programmes trouvés</translation>
+        <location filename="../../input/input_factory.cpp" line="+75"/>
+        <source>No valid device found use Null device instead.</source>
+        <translatorcomment>traduction &quot;null device&quot; ?</translatorcomment>
+        <translation type="unfinished">Aucun récepteur valide trouvé. Utilisation de &quot;Null device&quot; à la place.</translation>
     </message>
     <message>
-        <location filename="../src/gui/QML/ChannelBrowser.qml" line="495"/>
-        <source>Automatic RF gain</source>
-        <translation>Gain RF automatique</translation>
-    </message>
-    <message>
-        <location filename="../src/gui/QML/ChannelBrowser.qml" line="514"/>
-        <source>Manual gain</source>
-        <translation>Gain RF manuel</translation>
-    </message>
-    <message>
-        <location filename="../src/gui/QML/ChannelBrowser.qml" line="519"/>
-        <source>Value: </source>
-        <translation>Valeur : </translation>
-    </message>
-    <message>
-        <source>Select channel manually</source>
-        <translation type="obsolete">Manuelle Kanalwahl</translation>
-    </message>
-    <message>
-        <location filename="../src/gui/QML/ChannelBrowser.qml" line="537"/>
-        <source>Clear station list</source>
-        <translation>Effacer la liste</translation>
-    </message>
-    <message>
-        <location filename="../src/gui/QML/ChannelBrowser.qml" line="573"/>
-        <source>Full screen mode</source>
-        <translation>Plein écran</translation>
-    </message>
-    <message>
-        <location filename="../src/gui/QML/ChannelBrowser.qml" line="582"/>
-        <source>Channel list layout</source>
-        <translation>Liste des programmes</translation>
-    </message>
-    <message>
-        <location filename="../src/gui/QML/ChannelBrowser.qml" line="593"/>
-        <source>Expert mode</source>
-        <translation>Mode expert</translation>
-    </message>
-    <message>
-        <location filename="../src/gui/QML/ChannelBrowser.qml" line="607"/>
-        <source>Exit welle.io</source>
-        <translation>Quitter</translation>
-    </message>
-</context>
-<context>
-    <name>ExpertView</name>
-    <message>
-        <location filename="../src/gui/QML/ExpertView.qml" line="19"/>
-        <source>Device</source>
-        <translation>Récepteur</translation>
-    </message>
-    <message>
-        <location filename="../src/gui/QML/ExpertView.qml" line="25"/>
-        <source>Current channel</source>
-        <translation>Bloc actuel</translation>
-    </message>
-    <message>
-        <location filename="../src/gui/QML/ExpertView.qml" line="31"/>
-        <source>Frequency correction</source>
-        <translation>Correction de fréquence</translation>
-    </message>
-    <message>
-        <location filename="../src/gui/QML/ExpertView.qml" line="37"/>
-        <source>SNR</source>
-        <translation>SNR</translation>
-    </message>
-    <message>
-        <location filename="../src/gui/QML/ExpertView.qml" line="43"/>
-        <source>Frame errors</source>
-        <translation>Erreurs de frames</translation>
-    </message>
-    <message>
-        <location filename="../src/gui/QML/ExpertView.qml" line="49"/>
-        <source>RS errors</source>
-        <translation>Erreurs RS</translation>
-    </message>
-    <message>
-        <location filename="../src/gui/QML/ExpertView.qml" line="55"/>
-        <source>AAC errors</source>
-        <translation>Erreurs AAC</translation>
-    </message>
-    <message>
-        <location filename="../src/gui/QML/ExpertView.qml" line="61"/>
-        <source>Frame synchronization</source>
-        <translation>Synchronisation</translation>
-    </message>
-    <message>
-        <location filename="../src/gui/QML/ExpertView.qml" line="67"/>
-        <source>FIC CRC</source>
-        <translation>FIC CRC</translation>
-    </message>
-    <message>
-        <location filename="../src/gui/QML/ExpertView.qml" line="62"/>
-        <location filename="../src/gui/QML/ExpertView.qml" line="68"/>
-        <source>OK</source>
-        <translation>OK</translation>
-    </message>
-    <message>
-        <location filename="../src/gui/QML/ExpertView.qml" line="62"/>
-        <source>Not synced</source>
-        <translation>Pas de synchronisation</translation>
-    </message>
-    <message>
-        <location filename="../src/gui/QML/ExpertView.qml" line="68"/>
-        <source>Error</source>
-        <translation>Erreur</translation>
-    </message>
-</context>
-<context>
-    <name>QObject</name>
-    <message>
-        <location filename="../src/input/CInputFactory.cpp" line="62"/>
-        <source>No valid device found, using Null device instead.</source>
-        <translation>Aucun récepteur trouvé</translation>
-    </message>
-    <message>
-        <location filename="../src/input/CInputFactory.cpp" line="64"/>
+        <location line="+2"/>
+        <location line="+40"/>
         <source>Error while opening device</source>
         <translation>Erreur à l&apos;ouverture du récepteur</translation>
     </message>
     <message>
-        <location filename="../src/input/CRAWFile.cpp" line="153"/>
+        <location filename="../../input/raw_file.cpp" line="+177"/>
+        <location line="+20"/>
+        <source>Cannot open file </source>
+        <translation>Ouverture du fichier impossible </translation>
+    </message>
+    <message>
+        <location line="+113"/>
+        <source>End of file, restarting</source>
+        <translatorcomment>doute sur la traduction de &quot;lecture en boucle&quot;</translatorcomment>
+        <translation type="unfinished">Fin du fichier, lecture en boucle</translation>
+    </message>
+    <message>
+        <location line="+3"/>
+        <source>End of file</source>
+        <translation>Fin du fichier</translation>
+    </message>
+    <message>
+        <location line="+88"/>
         <source>Unknown RAW file format</source>
         <translation>Format de fichier RAW inconnu</translation>
     </message>
     <message>
-        <location filename="../src/input/CRAWFile.cpp" line="160"/>
-        <source>Cannot open file</source>
-        <translation>Ouverture impossible</translation>
+        <location filename="../../input/rtl_sdr.cpp" line="+299"/>
+        <location filename="../../input/rtl_tcp.cpp" line="+462"/>
+        <source>ADC overload. Maybe you are using a too high gain.</source>
+        <translatorcomment>ADC ou AGC ? Saturation ou Surcharge ? Saturation semble préférable.</translatorcomment>
+        <translation type="unfinished">Saturation ADC. Peut-être le gain est trop élevé.</translation>
     </message>
     <message>
-        <location filename="../src/input/CRAWFile.cpp" line="255"/>
-        <source>End of file, restarting</source>
-        <translation>Fin du fichier, lecture en boucle</translation>
-    </message>
-    <message>
-        <source>AGC overload. Maybe you are using a to high gain.</source>
-        <translation type="obsolete">HF-Eingangsverstärkung ist zu groß (AGC ist übersteuert).</translation>
-    </message>
-    <message>
-        <location filename="../src/input/CRTL_SDR.cpp" line="340"/>
-        <location filename="../src/input/CRTL_TCP_Client.cpp" line="359"/>
-        <source>ADC overload. Maybe you are using a to high gain.</source>
-        <translation>Gain trop haut</translation>
-    </message>
-    <message>
-        <location filename="../src/input/CRTL_SDR.cpp" line="402"/>
+        <location line="+96"/>
         <source>RTL-SDR is unplugged.</source>
-        <translation>Clé RTL-SDR déconnectée</translation>
+        <translation>RTL-SDR est débranché.</translation>
     </message>
     <message>
-        <location filename="../src/input/CRTL_TCP_Client.cpp" line="179"/>
+        <location filename="../../input/rtl_tcp.cpp" line="-190"/>
         <source>RTL-TCP connection closed.</source>
-        <translation>Connection RTL-TCP fermée</translation>
+        <translation>Connexion RTL-TCP fermée.</translation>
     </message>
     <message>
-        <location filename="../src/input/CRTL_TCP_Client.cpp" line="312"/>
+        <location line="+141"/>
         <source>Connection failed to server </source>
-        <translation>Impossible de se connecter au serveur</translation>
+        <translation>Echec de connexion au serveur </translation>
+    </message>
+    <message>
+        <location filename="../../input/soapy_sdr.cpp" line="+91"/>
+        <source>Could not load SoapySDR with provided device arguments.</source>
+        <translation>Chargement de SoapySDR impossible avec les paramètres de périphérique renseignés.</translation>
     </message>
 </context>
 <context>
-    <name>SettingsPage</name>
+    <name>ChannelSettings</name>
     <message>
-        <location filename="../src/gui/QML/SettingsPage.qml" line="94"/>
-        <source>Channel scan</source>
-        <translation>Recherche sur le bloc</translation>
+        <location filename="../QML/settingpages/ChannelSettings.qml" line="+29"/>
+        <source>Automatic start playing last station</source>
+        <translation>Lire automatiquement la dernière station</translation>
     </message>
     <message>
-        <location filename="../src/gui/QML/SettingsPage.qml" line="100"/>
-        <source>Start</source>
-        <translation>Démarrage</translation>
+        <location line="+7"/>
+        <source>Display station name in the window title</source>
+        <translation>Afficher le nom de la station dans le titre de la fenêtre</translation>
+    </message>
+</context>
+<context>
+    <name>ConstellationGraph</name>
+    <message>
+        <location filename="../QML/expertviews/ConstellationGraph.qml" line="+10"/>
+        <source>Constellation Diagram</source>
+        <translation>Diagramme de constellation</translation>
     </message>
     <message>
-        <location filename="../src/gui/QML/SettingsPage.qml" line="111"/>
-        <source>Stop</source>
-        <translation>Arrêt</translation>
+        <location line="+30"/>
+        <source>DQPSK Angle [Degree]</source>
+        <translation>Angle DQPSK [degrés]</translation>
     </message>
     <message>
-        <location filename="../src/gui/QML/SettingsPage.qml" line="50"/>
-        <source>Found channels</source>
-        <translation>Programmes trouvés</translation>
+        <location line="+7"/>
+        <source>Subcarrier</source>
+        <translation>Sous-porteuse</translation>
+    </message>
+</context>
+<context>
+    <name>DABConstants</name>
+    <message>
+        <location filename="../../backend/dab-constants.cpp" line="+184"/>
+        <source>News</source>
+        <translatorcomment>ETSI TS 101 756 V2.2.1 (2017-08) (page 23)
+</translatorcomment>
+        <translation>Informations</translation>
     </message>
     <message>
-        <location filename="../src/gui/QML/SettingsPage.qml" line="127"/>
-        <source>Found stations</source>
-        <translation>Programmes trouvés</translation>
+        <location line="+1"/>
+        <source>Current Affairs</source>
+        <translatorcomment>ETSI TS 101 756 V2.2.1 (2017-08) (page 23)</translatorcomment>
+        <translation>Magazine</translation>
     </message>
     <message>
-        <location filename="../src/gui/QML/SettingsPage.qml" line="178"/>
-        <source>Hardware RF gain</source>
-        <translation>Gain RF hardware</translation>
+        <location line="+1"/>
+        <source>Information</source>
+        <translatorcomment>ETSI TS 101 756 V2.2.1 (2017-08) (page 23)</translatorcomment>
+        <translation>Info-Service</translation>
     </message>
     <message>
-        <location filename="../src/gui/QML/SettingsPage.qml" line="191"/>
-        <source>Automatic RF gain</source>
-        <translation>Gain RF automatique</translation>
+        <location line="+1"/>
+        <source>Sport</source>
+        <translatorcomment>ETSI TS 101 756 V2.2.1 (2017-08) (page 23)</translatorcomment>
+        <translation>Sport</translation>
     </message>
     <message>
-        <location filename="../src/gui/QML/SettingsPage.qml" line="208"/>
-        <source>Manual gain</source>
-        <translation>Gain RF manuel</translation>
+        <location line="+1"/>
+        <source>Education</source>
+        <translatorcomment>ETSI TS 101 756 V2.2.1 (2017-08) (page 23)</translatorcomment>
+        <translation>Educatif</translation>
     </message>
     <message>
-        <location filename="../src/gui/QML/SettingsPage.qml" line="209"/>
-        <source>Value: </source>
-        <translation>Valeur: </translation>
+        <location line="+1"/>
+        <source>Drama</source>
+        <translatorcomment>ETSI TS 101 756 V2.2.1 (2017-08) (page 23)</translatorcomment>
+        <translation>Fiction</translation>
     </message>
     <message>
-        <location filename="../src/gui/QML/SettingsPage.qml" line="229"/>
-        <source>Full screen mode</source>
-        <translation>Plein écran</translation>
+        <location line="+1"/>
+        <source>Arts</source>
+        <translatorcomment>ETSI TS 101 756 V2.2.1 (2017-08) (page 23)</translatorcomment>
+        <translation>Culture</translation>
     </message>
     <message>
-        <location filename="../src/gui/QML/SettingsPage.qml" line="239"/>
-        <source>Channel list layout (experimental)</source>
-        <translation>List des chaines (expérimental)</translation>
+        <location line="+1"/>
+        <source>Science</source>
+        <translatorcomment>ETSI TS 101 756 V2.2.1 (2017-08) (page 23)</translatorcomment>
+        <translation>Sciences</translation>
     </message>
     <message>
-        <location filename="../src/gui/QML/SettingsPage.qml" line="252"/>
+        <location line="+1"/>
+        <source>Talk</source>
+        <translatorcomment>ETSI TS 101 756 V2.2.1 (2017-08) (page 23)</translatorcomment>
+        <translation>Divertissement</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Pop Music</source>
+        <translatorcomment>ETSI TS 101 756 V2.2.1 (2017-08) (page 23)</translatorcomment>
+        <translation>Musique Pop</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Rock Music</source>
+        <translatorcomment>ETSI TS 101 756 V2.2.1 (2017-08) (page 23)</translatorcomment>
+        <translation>Musique Rock</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Easy Listening</source>
+        <translatorcomment>ETSI TS 101 756 V2.2.1 (2017-08) (page 23)</translatorcomment>
+        <translation>Chansons</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Light classical</source>
+        <translatorcomment>ETSI TS 101 756 V2.2.1 (2017-08) (page 23)</translatorcomment>
+        <translation>Classique Léger</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Classical Music</source>
+        <translatorcomment>ETSI TS 101 756 V2.2.1 (2017-08) (page 23)</translatorcomment>
+        <translation>MusiqueClassique</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Other Music</source>
+        <translatorcomment>ETSI TS 101 756 V2.2.1 (2017-08) (page 23)</translatorcomment>
+        <translation>Autre Musique</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Weather</source>
+        <translatorcomment>ETSI TS 101 756 V2.2.1 (2017-08) (page 23)</translatorcomment>
+        <translation>Météo</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Finance</source>
+        <translatorcomment>ETSI TS 101 756 V2.2.1 (2017-08) (page 23)</translatorcomment>
+        <translation>Economie</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Children&apos;s</source>
+        <translatorcomment>ETSI TS 101 756 V2.2.1 (2017-08) (page 23)</translatorcomment>
+        <translation>Enfants</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Factual</source>
+        <translatorcomment>ETSI TS 101 756 V2.2.1 (2017-08) (page 23)</translatorcomment>
+        <translation>Société</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Religion</source>
+        <translatorcomment>ETSI TS 101 756 V2.2.1 (2017-08) (page 23)</translatorcomment>
+        <translation>Religion</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Phone In</source>
+        <translatorcomment>ETSI TS 101 756 V2.2.1 (2017-08) (page 23)</translatorcomment>
+        <translation>Ligne ouverte</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Travel</source>
+        <translatorcomment>ETSI TS 101 756 V2.2.1 (2017-08) (page 23)</translatorcomment>
+        <translation>Voyages</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Leisure</source>
+        <translatorcomment>ETSI TS 101 756 V2.2.1 (2017-08) (page 23)</translatorcomment>
+        <translation>Loisirs</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Jazz and Blues</source>
+        <translatorcomment>ETSI TS 101 756 V2.2.1 (2017-08) (page 23)</translatorcomment>
+        <translation>Jazz</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Country Music</source>
+        <translatorcomment>ETSI TS 101 756 V2.2.1 (2017-08) (page 23)</translatorcomment>
+        <translation>Country</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>National Music</source>
+        <translatorcomment>ETSI TS 101 756 V2.2.1 (2017-08) (page 23)</translatorcomment>
+        <translation>Chanson du pays</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Oldies Music</source>
+        <translatorcomment>ETSI TS 101 756 V2.2.1 (2017-08) (page 23)</translatorcomment>
+        <translation>Musique rétro</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Folk Music</source>
+        <translatorcomment>ETSI TS 101 756 V2.2.1 (2017-08) (page 23)</translatorcomment>
+        <translation>Folklore</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Documentary</source>
+        <translatorcomment>ETSI TS 101 756 V2.2.1 (2017-08) (page 23)</translatorcomment>
+        <translation>Documentaire</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>entry 30 not used</source>
+        <translatorcomment>ETSI TS 101 756 V2.2.1 (2017-08) (page 23)</translatorcomment>
+        <translation>non utilisé (30)</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>entry 31 not used</source>
+        <translatorcomment>ETSI TS 101 756 V2.2.1 (2017-08) (page 23)</translatorcomment>
+        <translation>non utilisé (31)</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <location line="+117"/>
+        <source>UNKNOWN</source>
+        <translation>Inconnu</translation>
+    </message>
+    <message>
+        <location line="-103"/>
+        <source>Albanian</source>
+        <translation>Albanais</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Breton</source>
+        <translation>Breton</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Catalan</source>
+        <translation>Catalan</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Croatian</source>
+        <translation>Croate</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Welsh</source>
+        <translation>Gallois</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Czech</source>
+        <translation>Tchèque</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Danish</source>
+        <translation>Danois</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>German</source>
+        <translation>Allemand</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>English</source>
+        <translation>Anglais</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Spanish</source>
+        <translation>Espagnol</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Esperanto</source>
+        <translation>Esperanto</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Estonian</source>
+        <translation>Estonien</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Basque</source>
+        <translation>Basque</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Faroese</source>
+        <translation>Féroïen</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>French</source>
+        <translation>Français</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Frisian</source>
+        <translation>Frison</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Irish</source>
+        <translation>Irlandais</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Gaelic</source>
+        <translation>Gaélique</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Galician</source>
+        <translation>Galicien</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Icelandic</source>
+        <translation>Islandais</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Italian</source>
+        <translation>Italien</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Lappish</source>
+        <translation>Lapon</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Latin</source>
+        <translation>Latin</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Latvian</source>
+        <translation>Letton</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Luxembourgian</source>
+        <translation>Luxembourgeois</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Lithuanian</source>
+        <translation>Lituanien</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Hungarian</source>
+        <translation>Hongrois</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Maltese</source>
+        <translation>Maltais</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Dutch</source>
+        <translation>Néerlandais</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Norwegian</source>
+        <translation>Norvégien</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Occitan</source>
+        <translation>Occitan</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Polish</source>
+        <translation>Polonais</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Portuguese</source>
+        <translation>Portugais</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Romanian</source>
+        <translation>Roumain</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Romansh</source>
+        <translation>Romanche</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Serbian</source>
+        <translation>Serbe</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Slovak</source>
+        <translation>Slovaque</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Slovene</source>
+        <translation>Slovène</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Finnish</source>
+        <translation>Finnois</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Swedish</source>
+        <translation>Suédois</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Turkish</source>
+        <translation>Turc</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Flemish</source>
+        <translation>Flamand</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Walloon</source>
+        <translation>Wallon</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Background sound/clean feed</source>
+        <translation>Son d&apos;arrière plan / Flux propre</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Zulu</source>
+        <translation>Zoulou</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Vietnamese</source>
+        <translation>Vietnamien</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Uzbek</source>
+        <translation>Ouzbek</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Urdu</source>
+        <translation>Ourdou</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Ukranian</source>
+        <translation>Ukrainien</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Thai</source>
+        <translation>Thaï</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Telugu</source>
+        <translation>Télougou</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Tatar</source>
+        <translation>Tatar</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Tamil</source>
+        <translation>Tamoul</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Tadzhik</source>
+        <translation>Tadjik</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Swahili</source>
+        <translation>Swahili</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Sranan Tongo</source>
+        <translation>Sranan tongo</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Somali</source>
+        <translation>Somali</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Sinhalese</source>
+        <translation>Cingalais</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Shona</source>
+        <translation>Shona</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Serbo-Croat</source>
+        <translation>Serbo-croate</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Rusyn</source>
+        <translation>Rusyn</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Russian</source>
+        <translation>Russe</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Quechua</source>
+        <translation>Quechua</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Pushtu</source>
+        <translation>Pachto</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Punjabi</source>
+        <translation>Pendjabi</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Persian</source>
+        <translation>Persan</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Papiamento</source>
+        <translation>Papiamento</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Oriya</source>
+        <translation>Oriya</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Nepali</source>
+        <translation>Népalais</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Ndebele</source>
+        <translation>Ndébélé</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Marathi</source>
+        <translation>Marathi</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Moldavian</source>
+        <translation>Moldave</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Malaysian</source>
+        <translation>Malais</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Malagasay</source>
+        <translation>Malgache</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Macedonian</source>
+        <translation>Macédonien</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Laotian</source>
+        <translation>Lao</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Korean</source>
+        <translation>Coréen</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Khmer</source>
+        <translation>Khmer</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Kazakh</source>
+        <translation>Kazakh</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Kannada</source>
+        <translation>Kannada</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Japanese</source>
+        <translation>Japonais</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Indonesian</source>
+        <translation>Indonésien</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Hindi</source>
+        <translation>Hindi</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Hebrew</source>
+        <translation>Hébreu</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Hausa</source>
+        <translation>Haoussa</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Gurani</source>
+        <translation>Gurani</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Gujurati</source>
+        <translation>Gujarati</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Greek</source>
+        <translation>Grec</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Georgian</source>
+        <translation>Géorgien</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Fulani</source>
+        <translation>Peul</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Dari</source>
+        <translation>Dari</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Chuvash</source>
+        <translation>Tchouvache</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Chinese</source>
+        <translation>Chinois</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Burmese</source>
+        <translation>Birman</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Bulgarian</source>
+        <translation>Bulgare</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Bengali</source>
+        <translation>Bengali</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Belorussian</source>
+        <translation>Biélorusse</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Bambora</source>
+        <translation>Bambara</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Azerbaijani</source>
+        <translation>Azéri</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Assamese</source>
+        <translation>Assamais</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Armenian</source>
+        <translation>Arménien</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Arabic</source>
+        <translation>Arabe</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Amharic</source>
+        <translation>Amharique</translation>
+    </message>
+</context>
+<context>
+    <name>ExpertSettings</name>
+    <message>
+        <location filename="../QML/settingpages/ExpertSettings.qml" line="+33"/>
+        <source>Global</source>
+        <translation>Global</translation>
+    </message>
+    <message>
+        <location line="+4"/>
         <source>Expert mode</source>
         <translation>Mode expert</translation>
     </message>
     <message>
-        <source>Select channel manually</source>
-        <translation type="vanished">Manuelle Kanalwahl</translation>
+        <location line="+6"/>
+        <source>Backend</source>
+        <translation type="unfinished">Sous-système (Backend)</translation>
     </message>
     <message>
-        <location filename="../src/gui/QML/SettingsPage.qml" line="135"/>
-        <source>Clear station list</source>
-        <translation>Effacer la liste</translation>
+        <location line="+7"/>
+        <source>Enable coarse corrector (for receivers with &gt;1kHz error)</source>
+        <translatorcomment>coarse corrector = correction grossière ?</translatorcomment>
+        <translation type="unfinished">Activer la correction grossière (pour récepteurs avec erreur &gt;1kHz)</translation>
     </message>
     <message>
-        <location filename="../src/gui/QML/SettingsPage.qml" line="265"/>
-        <source>Exit welle.io</source>
-        <translation>Quitter</translation>
+        <location line="+15"/>
+        <source>GetMiddle</source>
+        <translatorcomment>doute sur la traduction : &quot;Obtenir le milieu ?&quot; Moyen ? Centre</translatorcomment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>CorrelatePRS</source>
+        <translatorcomment>doute sur la traduction : &quot;Corréler PRS&quot;</translatorcomment>
+        <translation type="unfinished">Corréler PRS</translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>PatternOfZeros</source>
+        <translatorcomment>doute sur la traduction : &quot;Motif de zéros&quot;</translatorcomment>
+        <translation type="unfinished">Motif de zéros</translation>
+    </message>
+    <message>
+        <location line="+10"/>
+        <source>Coarse corrector algorithm</source>
+        <translatorcomment>coarse corrector = correction grossière ?</translatorcomment>
+        <translation type="unfinished">Algorithme de correction grossière</translation>
+    </message>
+    <message>
+        <location line="+8"/>
+        <source>Enable TII decoding to console log (increases CPU usage)</source>
+        <translation>Activer le décodage TII vers le log de la console (augmente l&apos;utilisation CPU)</translation>
+    </message>
+    <message>
+        <location line="+14"/>
+        <source>Strongest Peak</source>
+        <translatorcomment>doute sur la traduction : &quot;Pic le plus fort&quot; pour Peak utiliser Crête ou Pic</translatorcomment>
+        <translation type="unfinished">Crête la plus forte</translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>Earliest Peak With Binning</source>
+        <translatorcomment>doute sur la traduction pour Peak utiliser Crête ou Pic. Pour binning: Compartimentage</translatorcomment>
+        <translation type="unfinished">Crête la plus tôt avec compartimentage</translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>Threshold Before Peak</source>
+        <translatorcomment>doute sur la traduction : &quot;Seuil avant pic&quot; pour Peak utiliser Crête ou Pic. Pour threshold : Seuil</translatorcomment>
+        <translation type="unfinished">Seuil avant crête</translation>
+    </message>
+    <message>
+        <location line="+10"/>
+        <source>FFT Window placement algorithm</source>
+        <translation>Algorithme de placement de la fenêtre FFT</translation>
     </message>
 </context>
 <context>
-    <name>SpectrumView</name>
+    <name>GlobalSettings</name>
     <message>
-        <location filename="../src/gui/QML/SpectrumView.qml" line="14"/>
-        <source>Spectrum</source>
-        <translation>Spectre</translation>
+        <location filename="../QML/settingpages/GlobalSettings.qml" line="+68"/>
+        <source>Global settings</source>
+        <translation>Paramètres globaux</translation>
     </message>
     <message>
-        <location filename="../src/gui/QML/SpectrumView.qml" line="45"/>
+        <location line="+4"/>
+        <source>Full screen mode</source>
+        <translation>Mode plein écran</translation>
+    </message>
+    <message>
+        <location line="+31"/>
+        <source>Language</source>
+        <translation>Langue (Language)</translation>
+    </message>
+    <message>
+        <location line="+17"/>
+        <source>Qt Quick Style. Restart to apply.</source>
+        <translation>Style Qt Quick. Redémarrez pour appliquer.</translation>
+    </message>
+    <message>
+        <location line="+13"/>
+        <source>Light</source>
+        <translation>Clair</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Dark</source>
+        <translation>Sombre</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>System</source>
+        <translation>Système</translation>
+    </message>
+    <message>
+        <location line="+4"/>
+        <source>Theme</source>
+        <translation>Thème</translation>
+    </message>
+    <message>
+        <location line="+13"/>
+        <source>Global receiver settings</source>
+        <translation>Paramètres globaux du récepteur</translation>
+    </message>
+    <message>
+        <location line="+4"/>
+        <source>Automatic RF gain</source>
+        <translation>Gain RF automatique</translation>
+    </message>
+    <message>
+        <location line="+20"/>
+        <source>Manual gain</source>
+        <translation>Gain RF manuel</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>Value: </source>
+        <translation>Valeur : </translation>
+    </message>
+    <message>
+        <location line="+20"/>
+        <source>Auto detect</source>
+        <translation>Détection automatique</translation>
+    </message>
+    <message>
+        <location line="+9"/>
+        <source>None</source>
+        <translation>Aucun</translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>Airspy</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>rtl-sdr</source>
+        <translatorcomment>minuscules ? majuscules ? Mis en majuscules pour harmoniser tout le logiciel</translatorcomment>
+        <translation type="unfinished">RTL-SDR</translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>SoapySDR</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>rtl-tcp</source>
+        <translatorcomment>minuscules ? majuscules ? Mis en majuscules pour harmoniser tout le logiciel</translatorcomment>
+        <translation type="unfinished">RTL-TCP</translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>RAW file</source>
+        <translation type="unfinished">Fichier RAW</translation>
+    </message>
+</context>
+<context>
+    <name>ImpulseResponseGraph</name>
+    <message>
+        <location filename="../QML/expertviews/ImpulseResponseGraph.qml" line="+12"/>
+        <source>Impulse Response</source>
+        <translation>Réponse impulsionnelle</translation>
+    </message>
+    <message>
+        <location line="+11"/>
         <source>Amplitude</source>
         <translation>Amplitude</translation>
     </message>
     <message>
-        <location filename="../src/gui/QML/SpectrumView.qml" line="51"/>
-        <source>Frequency</source>
-        <translation>Fréquence</translation>
+        <location line="+1"/>
+        <source>Samples</source>
+        <translation>Echantillon</translation>
     </message>
 </context>
 <context>
-    <name>TouchSwitch</name>
+    <name>MainView</name>
     <message>
-        <location filename="../src/gui/QML/style/TouchSwitch.qml" line="16"/>
-        <source>ON</source>
-        <translation>On</translation>
+        <location filename="../QML/MainView.qml" line="+171"/>
+        <source>Settings</source>
+        <translation>Paramètres</translation>
     </message>
     <message>
-        <location filename="../src/gui/QML/style/TouchSwitch.qml" line="17"/>
-        <source>OFF</source>
-        <translation>OFF</translation>
+        <location line="+8"/>
+        <source>Expert Settings</source>
+        <translation>Paramètres expert</translation>
+    </message>
+    <message>
+        <location line="+8"/>
+        <source>About</source>
+        <translation>A propos de</translation>
+    </message>
+    <message>
+        <location line="+8"/>
+        <source>Exit</source>
+        <translation>Quitter</translation>
+    </message>
+    <message>
+        <location line="+35"/>
+        <source>All stations</source>
+        <translation>Toutes les stations</translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>Favorites</source>
+        <translation>Favoris</translation>
+    </message>
+    <message>
+        <location line="+28"/>
+        <source>Start station scan</source>
+        <translation>Rechercher les stations</translation>
+    </message>
+    <message>
+        <location line="+12"/>
+        <source>Stop station scan</source>
+        <translation>Arrêter la recherche</translation>
+    </message>
+    <message>
+        <location line="+12"/>
+        <source>Clear station list</source>
+        <translation>Effacer la liste des stations</translation>
+    </message>
+    <message>
+        <location line="+8"/>
+        <source>Station settings</source>
+        <translation>Paramètres des stations</translation>
+    </message>
+    <message>
+        <location line="+13"/>
+        <source>No stations in list</source>
+        <translation>Pas de stations dans la liste</translation>
+    </message>
+    <message>
+        <location line="+37"/>
+        <source>Manual channel</source>
+        <translation>Canal manuel</translation>
+    </message>
+    <message>
+        <location line="+54"/>
+        <source>Service Overview</source>
+        <translation>Aperçu du service</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Service Details</source>
+        <translation>Détails du service</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>MOT Slide Show</source>
+        <translation>Diaporama MOT</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Spectrum</source>
+        <translation>Spectre</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Impulse Response</source>
+        <translation>Réponse impulsionnelle</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Constellation Diagram</source>
+        <translation>Diagramme de constellation</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Null Symbol</source>
+        <translatorcomment>?</translatorcomment>
+        <translation>Null Symbol</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Console Output</source>
+        <translation>Sortie console</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>RAW Recorder</source>
+        <translation>Enregistreur RAW I/Q</translation>
+    </message>
+</context>
+<context>
+    <name>MotView</name>
+    <message>
+        <location filename="../QML/MotView.qml" line="+8"/>
+        <source>MOT Slide Show</source>
+        <translation>Diaporama MOT</translation>
+    </message>
+</context>
+<context>
+    <name>NullSymbolGraph</name>
+    <message>
+        <location filename="../QML/expertviews/NullSymbolGraph.qml" line="+10"/>
+        <source>Null Symbol</source>
+        <translatorcomment>Traduction de NULL selon : http://www.btb.termiumplus.gc.ca/tpv2alpha/alpha-fra.html Mais peut etre laisser tel quel car Null Symbol a un sens précis dans le signal DAB+</translatorcomment>
+        <translation type="unfinished">Null Symbol</translation>
+    </message>
+    <message>
+        <location line="+8"/>
+        <source>Amplitude</source>
+        <translation>Amplitude</translation>
+    </message>
+</context>
+<context>
+    <name>RTLSDRSettings</name>
+    <message>
+        <location filename="../QML/settingpages/RTLSDRSettings.qml" line="+12"/>
+        <source>rtl-sdr settings</source>
+        <translation>Paramètres RTL-SDR</translation>
+    </message>
+    <message>
+        <location line="+9"/>
+        <source>Enable bias tee (not from all dongles supported)</source>
+        <translation>Activer le té de polarisation (non pris en charge par tous les récepteurs)</translation>
+    </message>
+</context>
+<context>
+    <name>RTLTCPSettings</name>
+    <message>
+        <location filename="../QML/settingpages/RTLTCPSettings.qml" line="+11"/>
+        <source>rtl-tcp settings</source>
+        <translation>Paramètres RTL-TCP</translation>
+    </message>
+    <message>
+        <location line="+16"/>
+        <source>IP address</source>
+        <translation>Adresse IP</translation>
+    </message>
+    <message>
+        <location line="+30"/>
+        <source>IP port</source>
+        <translation>Port IP</translation>
+    </message>
+</context>
+<context>
+    <name>RadioView</name>
+    <message>
+        <location filename="../QML/RadioView.qml" line="+12"/>
+        <source>Service Overview</source>
+        <translation>Aperçu du service</translation>
+    </message>
+</context>
+<context>
+    <name>RawFileSettings</name>
+    <message>
+        <location filename="../QML/settingpages/RawFileSettings.qml" line="+12"/>
+        <source>RAW file settings</source>
+        <translation>Paramètres du fichier RAW</translation>
+    </message>
+    <message>
+        <location line="+27"/>
+        <source>Open RAW file</source>
+        <translation>Ouvrir le fichier RAW</translation>
+    </message>
+    <message>
+        <location line="+4"/>
+        <source>Currently shown under Android</source>
+        <translation>Actuellement affiché sur Android</translation>
+    </message>
+    <message>
+        <location line="+19"/>
+        <source>Selected file:</source>
+        <translation>Fichier sélectionné :</translation>
+    </message>
+</context>
+<context>
+    <name>RawRecorder</name>
+    <message>
+        <location filename="../QML/expertviews/RawRecorder.qml" line="+11"/>
+        <source>I/Q RAW Recorder (experimental)</source>
+        <translation>Enregistreur RAW I/Q (expérimental)</translation>
+    </message>
+    <message>
+        <location line="+8"/>
+        <source>Ring buffer length [s]</source>
+        <translation>Longueur du buffer circulaire [s]</translation>
+    </message>
+    <message>
+        <location line="+14"/>
+        <source>Save ring buffer</source>
+        <translation type="unfinished">Sauvegarder le buffer circulaire</translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>Init</source>
+        <translatorcomment>?</translatorcomment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+14"/>
+        <source>Ring buffer size (roughly): </source>
+        <translatorcomment>Un peu trop long ?</translatorcomment>
+        <translation type="unfinished">Taille du buffer circulaire (grosso-modo) : </translation>
+    </message>
+</context>
+<context>
+    <name>ServiceDetails</name>
+    <message>
+        <location filename="../QML/expertviews/ServiceDetails.qml" line="+10"/>
+        <source>Service Details</source>
+        <translation>Détails du service</translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>Device</source>
+        <translation>Récepteur</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>Current channel</source>
+        <translatorcomment>une ancienne traduction proposait Bloc actuel</translatorcomment>
+        <translation>Canal actuel</translation>
+    </message>
+    <message>
+        <location line="+13"/>
+        <source>Frame sync</source>
+        <translatorcomment>pluriel ?</translatorcomment>
+        <translation>Synchronisation de trame</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <location line="+15"/>
+        <source>OK</source>
+        <translation>OK</translation>
+    </message>
+    <message>
+        <location line="-15"/>
+        <source>Not synced</source>
+        <translation>Pas de sync.</translation>
+    </message>
+    <message>
+        <location line="+14"/>
+        <source>FIC CRC</source>
+        <translation>FIC CRC</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Error</source>
+        <translation>Erreur</translation>
+    </message>
+    <message>
+        <location line="+15"/>
+        <source>Frame errors</source>
+        <translatorcomment>pluriel ?</translatorcomment>
+        <translation>Erreurs de trame</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Frequency correction</source>
+        <translation>Correction de fréquence</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>SNR</source>
+        <translation>SNR (rapport signal/bruit)</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>RS errors</source>
+        <translation>Erreurs RS</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>AAC errors</source>
+        <translation>Erreurs AAC</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>DAB date and time</source>
+        <translation>Date et heure DAB</translation>
+    </message>
+</context>
+<context>
+    <name>SoapySDRSettings</name>
+    <message>
+        <location filename="../QML/settingpages/SoapySDRSettings.qml" line="+11"/>
+        <source>SoapySDR settings</source>
+        <translation>Paramètres SoapySDR</translation>
+    </message>
+    <message>
+        <location line="+13"/>
+        <source>Antenna</source>
+        <translation>Antenne</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Enter antenna</source>
+        <translation>Entrer l&apos;antenne</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Clock source</source>
+        <translation>Source d&apos;horloge</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Enter clock source</source>
+        <translation>Entrer la source d&apos;horloge</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Driver arguments</source>
+        <translation>Arguments du pilote</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Enter driver arguments</source>
+        <translation>Entrer les arguments du pilote</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Apply</source>
+        <translation>Appliquer</translation>
+    </message>
+</context>
+<context>
+    <name>SpectrumGraph</name>
+    <message>
+        <location filename="../QML/expertviews/SpectrumGraph.qml" line="+12"/>
+        <source>Spectrum</source>
+        <translation>Spectre</translation>
+    </message>
+    <message>
+        <location line="+9"/>
+        <source>Amplitude</source>
+        <translation>Amplitude</translation>
+    </message>
+</context>
+<context>
+    <name>TextOutputView</name>
+    <message>
+        <location filename="../QML/expertviews/TextOutputView.qml" line="+11"/>
+        <source>Console Output</source>
+        <translation>Sortie console</translation>
+    </message>
+</context>
+<context>
+    <name>ViewBaseFrame</name>
+    <message>
+        <location filename="../QML/components/ViewBaseFrame.qml" line="+106"/>
+        <source>Minimize</source>
+        <translation>Minimiser</translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>Maximize</source>
+        <translation>Maximiser</translation>
+    </message>
+    <message>
+        <location line="+9"/>
+        <source>Remove</source>
+        <translation>Supprimer</translation>
+    </message>
+</context>
+<context>
+    <name>WDialog</name>
+    <message>
+        <location filename="../QML/components/WDialog.qml" line="+32"/>
+        <source>‹</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>WSpectrum</name>
+    <message>
+        <location filename="../QML/components/WSpectrum.qml" line="+15"/>
+        <source>Amplitude</source>
+        <translation>Amplitude</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Frequency</source>
+        <translation>Fréquence</translation>
+    </message>
+    <message>
+        <location line="+23"/>
+        <source>Waterfall</source>
+        <translatorcomment>Adapté de la traduction &quot;WATERFALL DISPLAY&quot; proposée par: http://www.btb.termiumplus.gc.ca/tpv2alpha/alpha-fra.html?lang=fra&amp;i=1&amp;srchtxt=WATERFALL+DISPLAY&amp;index=alt&amp;codom2nd_wet=KB#resultrecs</translatorcomment>
+        <translation type="unfinished">Ecriture ligne par ligne</translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>experimental</source>
+        <translation>expérimental</translation>
+    </message>
+    <message>
+        <location line="+62"/>
+        <source>Sensitivity</source>
+        <translation>Sensibilité</translation>
     </message>
 </context>
 <context>
     <name>main</name>
     <message>
-        <location filename="../src/main.cpp" line="122"/>
-        <source>Set the GUI language (e.g. de-DE)</source>
-        <translation>Régler la langue</translation>
+        <location filename="../main.cpp" line="+99"/>
+        <source>Records DAB frames (*.mp2) or DAB+ superframes with RS coding (*.dab). This file can be used to analyse X-PAD data with XPADxpert</source>
+        <translation>Enregistre les trames DAB (*.mp2) ou les supertrames DAB+ avec codage RS (*.dab). Ce fichier peut être utilisé pour analyser des données X-PAD avec XPADxpert</translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="123"/>
-        <source>Language</source>
-        <translation>Langue</translation>
+        <location line="+1"/>
+        <location line="+5"/>
+        <source>File name</source>
+        <translation>Nom de fichier</translation>
     </message>
     <message>
-        <source>Input device</source>
-        <translation type="vanished">Radioempfänger</translation>
+        <location line="-1"/>
+        <source>Redirects all log output texts to a file.</source>
+        <translatorcomment>Traduction incertaine</translatorcomment>
+        <translation type="unfinished">Redirige tous les textes de sortie log vers un fichier.</translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="127"/>
-        <source>Input device. Possible is: auto (default), airspy, rtl_tcp, rtl_sdr, rawfile, soapysdr</source>
-        <translation>Périphérique d&apos;entrée. Options possibles : Auto (défaut), airspy, rtl_tcp, rtl_sdr; rawfile, soapysdr</translation>
+        <location line="+5"/>
+        <source>Qt Quick Controls Style for the 1st launch</source>
+        <translation type="unfinished">Style Qt Quick Controls pour le 1er lancement</translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="128"/>
-        <source>Name</source>
-        <translation>Nom</translation>
-    </message>
-    <message>
-        <location filename="../src/main.cpp" line="132"/>
-        <source>DAB mode. Possible is: 1, 2 or 4, default: 1</source>
-        <translation>Mode DAB. Options : 1 (défaut), 2 ou 4</translation>
-    </message>
-    <message>
-        <location filename="../src/main.cpp" line="133"/>
-        <source>Mode</source>
-        <translation>Mode</translation>
-    </message>
-    <message>
-        <location filename="../src/main.cpp" line="137"/>
-        <source>rtl_tcp server IP address. Only valid for input rtl_tcp.</source>
-        <translation>Adresse IP du serveur RTL_TCP. IP valide</translation>
-    </message>
-    <message>
-        <location filename="../src/main.cpp" line="138"/>
-        <source>IP address</source>
-        <translation>Adresse IP</translation>
-    </message>
-    <message>
-        <location filename="../src/main.cpp" line="142"/>
-        <source>rtl_tcp server IP port. Only valid for input rtl_tcp.</source>
-        <translation>Port RTL_TCP</translation>
-    </message>
-    <message>
-        <location filename="../src/main.cpp" line="143"/>
-        <source>Port</source>
-        <translation>Port</translation>
-    </message>
-    <message>
-        <location filename="../src/main.cpp" line="147"/>
-        <source>I/Q RAW file. Only valid for input rawfile.</source>
-        <translation>Fichier RAW. </translation>
-    </message>
-    <message>
-        <location filename="../src/main.cpp" line="148"/>
-        <source>I/Q RAW file</source>
-        <translation>Fichier I/Q RAW</translation>
-    </message>
-    <message>
-        <location filename="../src/main.cpp" line="152"/>
-        <source>I/Q RAW file format. Possible is: u8 (standard), s8, s16le, s16be. Only valid for input rawfile.</source>
-        <translation>Fichier I/Q RAW. Formats disponibles : u8 (Standard), s8, s16le, s16be. Fichiers raw valides.</translation>
-    </message>
-    <message>
-        <location filename="../src/main.cpp" line="153"/>
-        <source>I/Q RAW file format</source>
-        <translation>Format de fichiers I/Q RAW</translation>
-    </message>
-    <message>
-        <location filename="../src/gui/QML/main.qml" line="104"/>
-        <source>Expert mode is enabled</source>
-        <translation>Mode expert activé</translation>
-    </message>
-    <message>
-        <location filename="../src/gui/QML/main.qml" line="106"/>
-        <source>Expert mode is disabled</source>
-        <translation>Mode expert désactivé</translation>
+        <location line="+1"/>
+        <source>style_name</source>
+        <translation type="unfinished">nom_du_style</translation>
     </message>
 </context>
 </TS>

@@ -2,8 +2,21 @@ cmake_minimum_required(VERSION 3.2)
 
 project(Welle.Io VERSION 0.0.0 LANGUAGES C CXX)
 
+if(NOT WELLE-IO_VERSION)
+  set(WELLE-IO_VERSION ${PROJECT_VERSION})
+endif()
+
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_STANDARD 14)
+
+option(BUILD_WELLE_IO    "Build Welle.io"                        ON  )
+option(BUILD_WELLE_CLI   "Build welle-cli"                       ON  )
+option(WITH_APP_BUNDLE   "Enable Application Bundle for macOS"   ON  )
+option(KISS_FFT          "KISS FFT instead of FFTW"              OFF )
+option(PROFILING         "Enable profiling (see README.md)"      OFF )
+option(AIRSPY            "Compile with Airspy support"           OFF )
+option(RTLSDR            "Compile with RTL-SDR support"          OFF )
+option(SOAPYSDR          "Compile with SoapySDR support"         OFF )
 
 add_definitions(-Wall)
 add_definitions(-g)
@@ -23,31 +36,23 @@ set(CMAKE_BUILD_TYPE ${CMAKE_BUILD_TYPE} CACHE STRING "")
 
 list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake/Modules)
 
-if(NOT DEFINED BUILD_WELLE_IO)
-    set(BUILD_WELLE_IO ON)
-endif()
+if(APPLE AND WITH_APP_BUNDLE)
+    if(NOT DEFINED BUNDLE_INSTALL_DIR)
+        set(BUNDLE_INSTALL_DIR "/Applications")
+    endif()
 
-if(NOT DEFINED KISS_FFT)
-    set(KISS_FFT OFF)
-endif()
+    set(GUI_INSTALL_DIR "${BUNDLE_INSTALL_DIR}")
+else()
+    include(GNUInstallDirs)
 
-if(NOT DEFINED PROFILING)
-    set(PROFILING OFF)
+    set(GUI_INSTALL_DIR "${CMAKE_INSTALL_BINDIR}")
 endif()
-
-if(NOT APPLE)
-  if(NOT DEFINED BUILD_WELLE_CLI)
-    set(BUILD_WELLE_CLI ON)
-  endif()
-endif()
-
-include(GNUInstallDirs)
 
 if(BUILD_WELLE_IO)
     set(CMAKE_AUTOMOC ON)
     set(CMAKE_AUTORCC ON)
 
-    find_package(Qt5 COMPONENTS Widgets Quick Multimedia Charts Qml REQUIRED)
+    find_package(Qt5 COMPONENTS Widgets Quick QuickControls2 Multimedia Charts Qml REQUIRED)
 endif()
 
 if(PROFILING)
@@ -219,10 +224,39 @@ if(BUILD_WELLE_IO)
       ${SoapySDR_LIBRARIES}
       ${MPG123_LIBRARIES}
       Threads::Threads
-      Qt5::Core Qt5::Widgets Qt5::Multimedia Qt5::Charts Qt5::Qml Qt5::Quick
+      Qt5::Core Qt5::Widgets Qt5::Multimedia Qt5::Charts Qt5::Qml Qt5::Quick Qt5::QuickControls2
     )
 
-    INSTALL (TARGETS ${executableName} RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+    if(APPLE AND WITH_APP_BUNDLE)
+        set(macOsIcon ${CMAKE_CURRENT_SOURCE_DIR}/src/welle-gui/icons/icon.icns)
+        set_source_files_properties(${macOsIcon} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
+        target_sources(${executableName} PRIVATE ${macOsIcon})
+
+        set(SHORT_VERSION "${WELLE-IO_VERSION}")
+        set(EXECUTABLE "${executableName}")
+        set(TYPEINFO "io.welle.welle")
+        set(PRODUCT_BUNDLE_IDENTIFIER "io.welle.welle")
+
+        set_target_properties("${executableName}" PROPERTIES
+            MACOSX_BUNDLE TRUE
+            MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/welle-io.plist
+        )
+
+        INSTALL (TARGETS ${executableName} BUNDLE DESTINATION ${GUI_INSTALL_DIR})
+    else()
+        INSTALL (TARGETS ${executableName} RUNTIME DESTINATION ${GUI_INSTALL_DIR})
+
+        if(UNIX AND NOT APPLE)
+            INSTALL (FILES ${PROJECT_SOURCE_DIR}/welle-io.desktop DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/applications)
+
+            INSTALL (FILES ${PROJECT_SOURCE_DIR}/src/welle-gui/icons/16x16/welle-io.png DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/icons/hicolor/16x16/apps)
+            INSTALL (FILES ${PROJECT_SOURCE_DIR}/src/welle-gui/icons/24x24/welle-io.png DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/icons/hicolor/24x24/apps)
+            INSTALL (FILES ${PROJECT_SOURCE_DIR}/src/welle-gui/icons/32x32/welle-io.png DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/icons/hicolor/32x32/apps)
+            INSTALL (FILES ${PROJECT_SOURCE_DIR}/src/welle-gui/icons/48x48/welle-io.png DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/icons/hicolor/48x48/apps)
+            INSTALL (FILES ${PROJECT_SOURCE_DIR}/src/welle-gui/icons/128x128/welle-io.png DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/icons/hicolor/128x128/apps)
+            INSTALL (FILES ${PROJECT_SOURCE_DIR}/src/welle-gui/icons/256x256/welle-io.png DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/icons/hicolor/256x256/apps)
+        endif()
+    endif()
 endif()
 
 if(BUILD_WELLE_CLI)
@@ -246,8 +280,6 @@ if(BUILD_WELLE_CLI)
       Threads::Threads
     )
 
-    INSTALL (TARGETS ${cliExecutableName} RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
-
     add_custom_command(
             TARGET ${cliExecutableName} POST_BUILD
             COMMAND ${CMAKE_COMMAND} -E copy
@@ -258,23 +290,25 @@ if(BUILD_WELLE_CLI)
             COMMAND ${CMAKE_COMMAND} -E copy
                     ${CMAKE_SOURCE_DIR}/src/welle-cli/index.js
                     ${CMAKE_CURRENT_BINARY_DIR}/index.js)
+
+    if(APPLE AND WITH_APP_BUNDLE)
+        INSTALL (TARGETS ${cliExecutableName} RUNTIME DESTINATION ${GUI_INSTALL_DIR}/${executableName}.app/Contents/MacOS)
+        INSTALL (
+            FILES
+                ${PROJECT_SOURCE_DIR}/src/welle-cli/index.html
+                ${PROJECT_SOURCE_DIR}/src/welle-cli/index.js
+            DESTINATION ${GUI_INSTALL_DIR}/${executableName}.app/Contents/Resources/welle-cli
+        )
+    elseif(UNIX)
+        INSTALL (TARGETS ${cliExecutableName} RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+        INSTALL (
+            FILES
+                ${PROJECT_SOURCE_DIR}/src/welle-cli/index.html
+                ${PROJECT_SOURCE_DIR}/src/welle-cli/index.js
+            DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/welle-io/html/
+        )
+    endif()
 endif()
-
-INSTALL (FILES ${PROJECT_SOURCE_DIR}/welle-io.desktop DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/applications)
-
-INSTALL (FILES ${PROJECT_SOURCE_DIR}/src/welle-gui/icon/16x16/welle-io.png DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/icons/hicolor/16x16/apps)
-INSTALL (FILES ${PROJECT_SOURCE_DIR}/src/welle-gui/icon/24x24/welle-io.png DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/icons/hicolor/24x24/apps)
-INSTALL (FILES ${PROJECT_SOURCE_DIR}/src/welle-gui/icon/32x32/welle-io.png DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/icons/hicolor/32x32/apps)
-INSTALL (FILES ${PROJECT_SOURCE_DIR}/src/welle-gui/icon/48x48/welle-io.png DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/icons/hicolor/48x48/apps)
-INSTALL (FILES ${PROJECT_SOURCE_DIR}/src/welle-gui/icon/128x128/welle-io.png DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/icons/hicolor/128x128/apps)
-INSTALL (FILES ${PROJECT_SOURCE_DIR}/src/welle-gui/icon/256x256/welle-io.png DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/icons/hicolor/256x256/apps)
-
-INSTALL (
-  FILES
-    ${PROJECT_SOURCE_DIR}/src/welle-cli/index.html
-    ${PROJECT_SOURCE_DIR}/src/welle-cli/index.js
-  DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/welle-io/html/
-)
 
 configure_file(
     "${CMAKE_CURRENT_SOURCE_DIR}/cmake/cmake_uninstall.cmake.in"

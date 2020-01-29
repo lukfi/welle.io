@@ -56,6 +56,7 @@ ApplicationWindow {
     property bool isExpertView: false
     property bool isFullScreen: false
     property bool isLoaded: false
+    property bool isStationNameInWindowTitle: false
 
     StationListModel { id: stationList }
     StationListModel { id: favoritsList }
@@ -83,6 +84,8 @@ ApplicationWindow {
     width: getWidth()
     height: getHeight()
 
+    title: isStationNameInWindowTitle ? radioController.title.trim() + " - welle.io" : "welle.io"
+
     visibility: isFullScreen ? Window.FullScreen : Window.Windowed
 
     Component.onCompleted: {
@@ -103,6 +106,8 @@ ApplicationWindow {
         if(errorMessagePopup.text != "")
             errorMessagePopup.open();
 
+        updateTheme()
+
         isLoaded = true
     }
 
@@ -116,7 +121,6 @@ ApplicationWindow {
 
     header: ToolBar {
         id: overlayHeader
-        Material.foreground: "white"
 
         RowLayout {
             spacing: 20
@@ -159,10 +163,13 @@ ApplicationWindow {
 
             ToolButton {
                 icon.name: "menu"
+                icon.width: Units.dp(20)
+                icon.height: Units.dp(20)
                 onClicked: optionsMenu.open()
 
-                Menu {
+                WMenu {
                     id: optionsMenu
+                    sizeToContents: true
                     x: parent.width - width
                     transformOrigin: Menu.TopRight
 
@@ -224,8 +231,10 @@ ApplicationWindow {
             RowLayout {
                 WComboBox {
                     id: stationListBox
-                    Layout.preferredWidth: Units.dp(200)
-                    background: Rectangle { color: "white" }
+                    sizeToContents: true
+//                    background: Rectangle {
+//                        color: "white"
+//                    }
 
                     model:  [qsTr("All stations"), qsTr("Favorites")]
 
@@ -246,15 +255,13 @@ ApplicationWindow {
                     icon.name: "menu"
                     icon.height: Units.dp(15)
                     icon.width: Units.dp(15)
-                    background: Rectangle {
-                        color: menuButton.pressed ? "lightgrey" : "white"
-                        opacity: menuButton.pressed ? 100 : 0
-                    }
+                    flat:true
                     onClicked: stationMenu.open()
                     implicitWidth: contentItem.implicitWidth + Units.dp(15)
 
-                    Menu {
+                    WMenu {
                         id: stationMenu
+                        sizeToContents: true
 
                         MenuItem {
                             id: startStationScanItem
@@ -326,12 +333,12 @@ ApplicationWindow {
                     }
                     onFavoritClicked: {
                         var favoritInvert = !favorit
-                        stationList.setFavorit(stationSId, favoritInvert) // Invert favorit
+                        stationList.setFavorit(stationSId, channelName, favoritInvert) // Invert favorit
 
                         if(favoritInvert)
                             favoritsList.addStation(stationName, stationSId, channelName, true)
                         else
-                            favoritsList.removeStation(stationSId);
+                            favoritsList.removeStation(stationSId, channelName);
                     }
                 }
 
@@ -349,6 +356,7 @@ ApplicationWindow {
 
                 WComboBox {
                     id: manualChannelBox
+                    sizeToContents: true
                     model: ["5A", "5B", "5C", "5D",
                         "6A", "6B", "6C", "6D",
                         "7A", "7B", "7C", "7D",
@@ -363,8 +371,6 @@ ApplicationWindow {
                         "LI", "LJ", "LK", "LL",
                         "LM", "LN", "LO", "LP"]
 
-                    Layout.preferredHeight: Units.dp(25)
-                    Layout.preferredWidth: Units.dp(130)
                     onActivated: {
                         radioController.setManualChannel(model[index])
                     }
@@ -393,8 +399,9 @@ ApplicationWindow {
         visible: isExpertView
         palette.button: "darkorange"
 
-        Menu {
+        WMenu {
             id: viewMenu
+            sizeToContents: true
             transformOrigin: Menu.TopRight
 
             MenuItem {
@@ -464,10 +471,16 @@ ApplicationWindow {
     WDialog {
         id: stationSettingsDialog
         content: Loader {
+            id: stationSettingsLoader
             anchors.right: parent.right
             anchors.left: parent.left
             height: item.implicitHeight
             source:  "qrc:/QML/settingpages/ChannelSettings.qml"
+            onLoaded: isStationNameInWindowTitle = stationSettingsLoader.item.addStationNameToWindowTitleState
+        }
+        Connections {
+            target: stationSettingsLoader.item
+            onAddStationNameToWindowTitleStateChanged : isStationNameInWindowTitle = stationSettingsLoader.item.addStationNameToWindowTitleState
         }
     }
 
@@ -486,6 +499,7 @@ ApplicationWindow {
         Connections {
             target: globalSettingsLoader.item
             onEnableFullScreenStateChanged : isFullScreen = globalSettingsLoader.item.enableFullScreenState
+            onQQStyleThemeChanged: updateTheme()
         }
     }
 
@@ -568,13 +582,36 @@ ApplicationWindow {
         onMinimizeWindow: hide()
         onMaximizeWindow: showMaximized()
         onRestoreWindow: {
+            // On Linux (KDE?): Hide before we restore 
+            // otherwise the window will occasionaly not be brought to the front
+            if (Qt.platform.os === "linux" && !active) // Linux Workaround to display the window
+                hide()
             showNormal()
             raise() // Stay in foreground
+            if (Qt.platform.os === "linux" && !active) // Linux Workaround to display the window
+                requestActivate()
         }
     }
 
     onVisibilityChanged: {
         if(visibility === Window.Minimized)
             guiHelper.tryHideWindow()
+    }
+
+    function updateTheme() {
+        if (guiHelper.getQQStyle === "Universal") {
+            switch(globalSettingsLoader.item.qQStyleTheme) {
+                case 0: mainWindow.Universal.theme = Universal.Light; break;
+                case 1: mainWindow.Universal.theme = Universal.Dark; break;
+                case 2: mainWindow.Universal.theme = Universal.System; break;
+            }
+        }
+        else if (guiHelper.getQQStyle === "Material") {
+            switch(globalSettingsLoader.item.qQStyleTheme) {
+                case 0: mainWindow.Material.theme = Material.Light; break;
+                case 1: mainWindow.Material.theme = Material.Dark; break;
+                case 2: mainWindow.Material.theme = Material.System; break;
+            }
+        }
     }
 }

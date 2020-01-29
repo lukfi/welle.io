@@ -46,15 +46,17 @@ public:
     std::string getDescription(void);
     CDeviceID getID(void);
     bool restart(void);
+    bool is_ok(void);
 
     void setErrorMessage(QString message);
     void setLoaded(bool isLoaded);
     void setOpenInstallDialog(void);
 
 private:
-    ActivityResultReceiver *resultReceiver;
+    std::unique_ptr<ActivityResultReceiver> resultReceiver;
     QString message;
-    bool isLoaded;
+    bool isLoaded = false;
+    bool isPending = false;
 
 signals:
     void showAndroidInstallDialog(QString Title, QString Text);

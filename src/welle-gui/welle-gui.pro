@@ -2,9 +2,9 @@ include(../backend.pri)
 
 TEMPLATE = app
 TARGET = welle-io
-QT += network qml quick charts multimedia
+QT += quickcontrols2 qml quick charts multimedia
 
-RC_ICONS   =    icon/icon.ico
+RC_ICONS   =    icons/icon.ico
 RESOURCES +=    resources.qrc
 DISTFILES +=    \
     android/AndroidManifest.xml \
@@ -50,10 +50,12 @@ DISTFILES +=    \
     QML/GeneralView.qml \
     QML/settingpages/RawFileSettings.qml \
     QML/components/WComboBox.qml \
+    QML/components/WComboBoxList.qml \
     QML/components/WButton.qml \
     QML/components/WSwitch.qml \
     QML/components/WTumbler.qml \
     QML/components/WSpectrum.qml \
+    QML/components/WMenu.qml \
     QML/expertviews/ServiceDetails.qml \
     QML/components/WDialog.qml
 
@@ -107,7 +109,7 @@ unix: {
 win32 {
     GITHASHSTRING = $$system(git.exe rev-parse --short HEAD)
 } else:macx {
-    ICON = icon/icon.icns
+    ICON = icons/icon.icns
 }
 
 !isEmpty(GITHASHSTRING) {

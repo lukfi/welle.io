@@ -30,6 +30,7 @@
 #include <unistd.h>
 
 #include <QApplication>
+#include <QQuickStyle>
 #include <QCoreApplication>
 #include <QCommandLineParser>
 #include <QDebug>
@@ -71,17 +72,22 @@ int main(int argc, char** argv)
     // Create new QT application
     QApplication app(argc, argv);
 
+    //Initialise translation
+    QTranslator *translator = new QTranslator;
+    translator = CGUIHelper::loadTranslationFile(translator, "auto");
+    QCoreApplication::installTranslator(translator);
+
     // Register waterfall diagram
     qmlRegisterType<WaterfallItem>("io.welle", 1, 0, "Waterfall");
 
     // Set icon path
     QStringList themePaths;
-    themePaths << ":/icon";
+    themePaths << ":/icons";
     QIcon::setThemeSearchPaths(themePaths);
     QIcon::setThemeName("welle_io_icons");
 
     // Set icon
-    app.setWindowIcon(QIcon(":/icon/icon.png"));
+    app.setWindowIcon(QIcon(":/icons/icon.png"));
 
     // Handle the command line
     QCommandLineParser optionParser;
@@ -99,6 +105,11 @@ int main(int argc, char** argv)
         QCoreApplication::translate("main", "File name"));
     optionParser.addOption(LogFileName);
 
+    QCommandLineOption styleName("qqc-style",
+        QCoreApplication::translate("main", "Qt Quick Controls Style for the 1st launch"),
+        QCoreApplication::translate("main", "style_name"));
+    optionParser.addOption(styleName);
+
     //	Process the actual command line arguments given by the user
     optionParser.process(app);
 
@@ -115,6 +126,14 @@ int main(int argc, char** argv)
 
     CRadioController radioController(commandLineOptions);
 
+    QString styleNameArg = optionParser.value(styleName);
+    //qDebug() << "Command line style_name: " << styleNameArg ;
+    
+    // Set the Qt Quick Style.
+    QString styleToLoad = CGUIHelper::getQQStyleToLoad(styleNameArg);
+    if (!styleToLoad.isEmpty())
+        QQuickStyle::setStyle(styleToLoad);
+
     QSettings settings;
     settings.setValue("version", QString(CURRENT_VERSION));
 
@@ -126,7 +145,13 @@ int main(int argc, char** argv)
             radioController.setAutoPlay(lastStation[1], lastStation[0]);
     }
 
+    // Load mandatory driver arguments to init input device
+    radioController.setDeviceParam("SoapySDRDriverArgs", settings.value("soapyDriverArgs","").toString());
+    radioController.setDeviceParam("SoapySDRAntenna", settings.value("soapyDriverAntenna","").toString());
+    radioController.setDeviceParam("SoapySDRClockSource", settings.value("soapyDriverClockSource","").toString());
+
     CGUIHelper guiHelper(&radioController);
+    guiHelper.setTranslator(translator);
 
     // Create new QML application, set some requried options and load the QML file
     QQmlApplicationEngine engine;
