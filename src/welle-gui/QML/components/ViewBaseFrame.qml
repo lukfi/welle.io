@@ -1,6 +1,8 @@
 import QtQuick 2.0
 import QtQuick.Layouts 1.1
 import QtQuick.Controls 2.0
+import QtQuick.Controls.Material 2.1
+import QtQuick.Controls.Universal 2.1
 
 // Import custom styles
 import "../texts"
@@ -8,7 +10,9 @@ import "../components"
 
 Rectangle {
     id: root
+    color: (Material.theme === Material.Dark || Universal.theme === Universal.Dark) ? "grey" : "white"
     border.color: isExpert ? "lightgrey": "white"
+
     Layout.fillHeight: true
     Layout.fillWidth: true
     Layout.alignment: Qt.AlignTop | Qt.AlignLeft
@@ -32,7 +36,7 @@ Rectangle {
     Rectangle {
         id: rootBox
         anchors.fill: parent
-        color: "lightgrey"
+        color: (Material.theme === Material.Dark || Universal.theme === Universal.Dark) ? "darkgrey" : "lightgrey"
         visible: mouseArea.pressed
     }
 
@@ -41,9 +45,11 @@ Rectangle {
 
         ToolBar {
             Layout.fillWidth: true
+            Layout.margins: Units.dp(1)
             Layout.topMargin: Units.dp(5)
             visible: isExpert
-
+            implicitHeight: Units.dp(20)
+            
             MouseArea {
                 id: mouseArea
                 anchors.fill: parent
@@ -71,11 +77,6 @@ Rectangle {
                 }
             }
 
-            background: Rectangle {
-                implicitHeight: menuButton.height
-                opacity: 0
-            }
-
             Label {
                 id: label
                 anchors.horizontalCenter: parent.horizontalCenter
@@ -83,21 +84,22 @@ Rectangle {
                 font.pixelSize: TextStyle.textStandartSize
             }
 
-            ToolButton {
+            Button {
                 id: menuButton
                 anchors.right: parent.right
+                anchors.verticalCenter: parent.verticalCenter
+                implicitWidth: icon.width + Units.dp(20)
+
                 icon.name: "menu"
                 icon.height: Units.dp(10)
                 icon.width: Units.dp(10)
-                background: Rectangle {
-                    color: menuButton.pressed ? "lightgrey" : "white"
-                    opacity: menuButton.pressed ? 100 : 0
-                }
+                flat:true
 
                 onClicked: optionsMenu.open()
 
-                Menu {
+                WMenu {
                     id: optionsMenu
+                    sizeToContents: true
                     x: parent.width - width
                     transformOrigin: Menu.TopRight
 

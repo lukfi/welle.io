@@ -139,13 +139,14 @@ public:
     virtual void onSignalPresence(bool isSignal) override;
     virtual void onServiceDetected(uint32_t sId) override;
     virtual void onNewEnsemble(uint16_t eId) override;
+    virtual void onSetEnsembleLabel(DabLabel& label) override;
     virtual void onDateTimeUpdate(const dab_date_time_t& dateTime) override;
     virtual void onFIBDecodeSuccess(bool crcCheckOk, const uint8_t* fib) override;
     virtual void onNewImpulseResponse(std::vector<float>&& data) override;
     virtual void onConstellationPoints(std::vector<DSPCOMPLEX>&& data) override;
     virtual void onNewNullSymbol(std::vector<DSPCOMPLEX>&& data) override;
     virtual void onTIIMeasurement(tii_measurement_t&& m) override;
-    virtual void onMessage(message_level_t level, const std::string& text) override;
+    virtual void onMessage(message_level_t level, const std::string& text, const std::string& text2 = std::string()) override;
 
 private:
     void initialise(void);
@@ -154,6 +155,8 @@ private:
 
     std::shared_ptr<CVirtualInput> device;
     QVariantMap commandLineOptions;
+    std::map<DeviceParam, std::string> deviceParametersString;
+    std::map<DeviceParam, int> deviceParametersInt;
     Channels channels;
     RadioReceiverOptions rro;
 
@@ -223,6 +226,7 @@ public slots:
 
 private slots:
     void ensembleId(quint16);
+    void ensembleLabel(DabLabel&);
     void serviceId(quint32);
     void labelTimerTimeout(void);
     void stationTimerTimeout(void);
@@ -234,6 +238,7 @@ signals:
     void switchToNextChannel(bool isWait);
     void serviceDetected(quint32 sId);
     void ensembleIdUpdated(quint16 eId);
+    void ensembleLabelUpdated(DabLabel& label);
     void dateTimeUpdated(const dab_date_time_t& dateTime);
 
     void deviceNameChanged();

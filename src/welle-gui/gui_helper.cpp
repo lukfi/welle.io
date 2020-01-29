@@ -29,6 +29,7 @@
 
 #include <QDebug>
 #include <QSettings>
+#include <QQuickStyle>
 
 #include "gui_helper.h"
 #include "debug_output.h"
@@ -54,6 +55,7 @@ CGUIHelper::CGUIHelper(CRadioController *RadioController, QObject *parent)
     // Add image provider for the MOT slide show
     motImage = new CMOTImageProvider;
 
+    QSettings settings;
     connect(RadioController, &CRadioController::motChanged, this, &CGUIHelper::motUpdate);
     connect(RadioController, &CRadioController::showErrorMessage, this, &CGUIHelper::showErrorMessage);
     connect(RadioController, &CRadioController::showInfoMessage, this, &CGUIHelper::showInfoMessage);
@@ -82,7 +84,7 @@ CGUIHelper::CGUIHelper(CRadioController *RadioController, QObject *parent)
 
     trayIcon->setContextMenu(trayIconMenu);
 
-    trayIcon->setIcon(QIcon(":/icon/icon.png"));
+    trayIcon->setIcon(QIcon(":/icons/icon.png"));
     trayIcon->show();
 
     connect(trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
@@ -565,15 +567,13 @@ void CGUIHelper::setNewDebugOutput(QString text)
     emit newDebugOutput(text);
 }
 
-void CGUIHelper::addTranslator(QString Language, QObject *obj)
+void CGUIHelper::setTranslator(QTranslator *translator)
 {
-    if(translator) {
-        QCoreApplication::removeTranslator(translator);
-        delete(translator);
-    }
+    this->translator = translator;
+}
 
-    translator = new QTranslator;
-
+QTranslator* CGUIHelper::loadTranslationFile(QTranslator *translator, QString Language)
+{
     if(Language == "auto")
     {
         QString locale = QLocale::system().name();
@@ -597,14 +597,24 @@ void CGUIHelper::addTranslator(QString Language, QObject *obj)
     // Set new language
     qDebug() << "main:" <<  "Set language" << Language;
     bool isTranslation = translator->load(QString(":/i18n/") + Language);
-    QCoreApplication::installTranslator(translator);
 
-    if(!isTranslation && Language != "en_GB")
+    if(!isTranslation)
     {
-        qDebug() << "main:" <<  "Error while loading language" << Language << "use English \"en_GB\" instead";
-        Language = "en_GB";
+        qDebug() << "main:" <<  "Error while loading language" << Language << "use untranslated text (ie. English)";
     }
 
+    return translator;  
+}
+
+void CGUIHelper::updateTranslator(QString Language, QObject *obj)
+{
+    translator = loadTranslationFile(translator, Language);
+
+    translateGUI(Language, obj);
+}
+
+void CGUIHelper::translateGUI(QString Language, QObject *obj)
+{
     // Set locale e.g. time formarts
     QLocale curLocale(QLocale((const QString&)Language));
     QLocale::setDefault(curLocale);
@@ -613,6 +623,14 @@ void CGUIHelper::addTranslator(QString Language, QObject *obj)
     QQmlContext *currentContext = QQmlEngine::contextForObject(obj);
     QQmlEngine *engine = currentContext->engine();
     engine->retranslate();
+
+    // Start translation of non-QML GUI
+#ifndef QT_NO_SYSTEMTRAYICON
+    minimizeAction->setText(tr("Mi&nimize"));
+    maximizeAction->setText(tr("Ma&ximize"));
+    restoreAction->setText(tr("&Restore"));
+    quitAction->setText(tr("&Quit"));
+#endif
 }
 
 #ifdef __ANDROID__
@@ -633,3 +651,176 @@ void FileActivityResultReceiver::handleActivityResult(int receiverRequestCode, i
     }
 }
 #endif
+
+QString CGUIHelper::getQQStyleToLoad(QString styleNameArg)  // Static
+{
+    QSettings settings;
+    QString settingStyle = settings.value("qQStyle","").toString();
+
+    // In case this is a first launch where the setting in the config file is not set
+    if (settingStyle.isEmpty()) {
+        if (styleNameArg.isEmpty()) {
+            settings.setValue("qQStyle", "Default");
+            return "Default";
+        }
+        else {
+            settings.setValue("qQStyle", styleNameArg);
+            return styleNameArg;
+        }
+    }
+
+    QStringList availableStyle = QQuickStyle::availableStyles();
+
+    for ( const QString& curStyle : availableStyle ) {
+         if (settingStyle == curStyle)
+             return settingStyle;
+    }
+    if (settingStyle == "System_Auto")
+        return QString();
+    else
+        return "Default";
+}
+
+const QStringList CGUIHelper::qQStyleComboList()
+{
+    if ( !m_comboList.isEmpty() ) 
+        return m_comboList;
+
+    m_comboList = QQuickStyle::availableStyles();
+    m_comboList.sort();
+    int position = m_comboList.indexOf("Default");
+    m_comboList.move(position, 0);
+    m_comboList.insert(1, "System_Auto");
+
+    QString settingStyle = settings.value("qQStyle","").toString();
+    settingsStyleInAvailableStyles = false;
+
+    for ( const auto& style : m_comboList ) {
+         if (settingStyle == style)
+             settingsStyleInAvailableStyles = true;
+    }
+
+    if ( settingsStyleInAvailableStyles == false ) {
+        m_comboList.append(settingStyle);
+        qDebug() << "Style from the settings " << settingStyle << " not available on system. Adding it to the list of styles and loading 'Default' instead.";
+    }
+
+    return m_comboList;
+}
+
+bool CGUIHelper::isThemableStyle(QString style)
+{
+    return (style == "Universal" || style == "Material");
+}
+
+int CGUIHelper::getIndexOfQQStyle(QString style)
+{
+    //qDebug() << "getIndexOfQQStyle: " << style;
+    return m_comboList.indexOf(style);
+}
+
+QString CGUIHelper::getQQStyle()
+{
+    return settings.value("qQStyle","").toString();
+}
+
+void CGUIHelper::saveQQStyle(int index)
+{
+    //qDebug() << "saveQQStyle : " << index;
+    settings.setValue("qQStyle",m_comboList.value(index));
+    emit styleChanged();
+}
+
+StyleModel::StyleModel(QObject *parent)
+    : QAbstractListModel(parent)
+{
+}
+
+StyleModel* CGUIHelper::qQStyleComboModel()
+{
+    if (m_styleModel != nullptr)
+        m_styleModel = nullptr;
+
+    QString settingStyle = settings.value("qQStyle","").toString();
+
+    QStringList styleList = qQStyleComboList();
+
+    m_styleModel = new StyleModel();
+    for ( const auto& style : styleList  ) {
+        if ( !settingsStyleInAvailableStyles && (settingStyle == style)) {
+            m_styleModel->addStyle(Style(Style(style + tr(" (unavailable, fallback to Default)"), style)));
+        }
+        else {
+            if (style == "System_Auto")
+                m_styleModel->addStyle(Style(tr("Style of system"), style));
+            else if (style == "Default")
+                m_styleModel->addStyle(Style("Default" + tr(" (Recommended)"), style));
+            else
+                m_styleModel->addStyle(Style(style, style));
+        }
+    }
+    return m_styleModel;
+}
+
+QHash<int, QByteArray> StyleModel::roleNames() const
+{
+    QHash<int, QByteArray> roles;
+    roles[LabelRole] = "label";
+    roles[StyleRole] = "style";
+    return roles;
+}
+
+Style::Style(const QString &label, const QString &style)
+    : m_label(label), m_style(style)
+{
+}
+
+QString Style::label() const
+{
+    return m_label;
+}
+
+QString Style::style() const
+{
+    return m_style;
+}
+
+void StyleModel::addStyle(const Style &style)
+{
+    beginInsertRows(QModelIndex(), rowCount(), rowCount());
+    m_styles << style;
+    endInsertRows();
+}
+
+int StyleModel::rowCount(const QModelIndex & parent) const
+{
+    Q_UNUSED(parent);
+    return m_styles.count();
+}
+
+QVariantMap StyleModel::get(int row) const
+{
+    QHash<int,QByteArray> names = roleNames();
+    QHashIterator<int, QByteArray> i(names);
+    QVariantMap res;
+    QModelIndex idx = index(row, 0);
+    while (i.hasNext()) {
+        i.next();
+        QVariant data = idx.data(i.key());
+        res[i.value()] = data;
+    }
+    return res;
+}
+
+QVariant StyleModel::data(const QModelIndex & index, int role) const
+{
+    if (index.row() < 0 || index.row() >= m_styles.count())
+        return QVariant();
+
+    const Style &style = m_styles[index.row()];
+    if (role == LabelRole)
+        return style.label();
+    else if (role == StyleRole)
+        return style.style();
+    return QVariant();
+}

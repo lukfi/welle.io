@@ -77,14 +77,15 @@ class WebRadioInterface : public RadioControllerInterface {
         virtual void onSignalPresence(bool isSignal) override;
         virtual void onServiceDetected(uint32_t sId) override;
         virtual void onNewEnsemble(uint16_t eId) override;
+        virtual void onSetEnsembleLabel(DabLabel& label) override;
         virtual void onDateTimeUpdate(const dab_date_time_t& dateTime) override;
         virtual void onFIBDecodeSuccess(bool crcCheckOk, const uint8_t* fib) override;
         virtual void onNewImpulseResponse(std::vector<float>&& data) override;
         virtual void onNewNullSymbol(std::vector<DSPCOMPLEX>&& data) override;
         virtual void onConstellationPoints(std::vector<DSPCOMPLEX>&& data) override;
-        virtual void onMessage(message_level_t level, const std::string& text) override;
+        virtual void onMessage(message_level_t level, const std::string& text, const std::string& text2 = std::string()) override;
         virtual void onTIIMeasurement(tii_measurement_t&& m) override;
-        virtual void onShutdown() override;
+        virtual void onInputFailure() override;
 
     private:
         std::mutex retune_mut;

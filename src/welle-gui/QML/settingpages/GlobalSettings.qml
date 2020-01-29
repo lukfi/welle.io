@@ -11,6 +11,7 @@ Item {
     id: settingsPage
 
     property alias enableFullScreenState : enableFullScreen.checked
+    property alias qQStyleTheme : qQStyleTheme.currentIndex
     property bool isLoaded: false
 
     anchors.fill: parent
@@ -24,6 +25,7 @@ Item {
         property alias manualGainValue: valueSliderView.text
         property alias enableAutoSdr : enableAutoSdr.checked
         property alias languageValue : languageBox.currentIndex
+        property alias qQStyleTheme: qQStyleTheme.currentIndex
     }
 
     Component.onCompleted: {
@@ -74,20 +76,26 @@ Item {
 
             RowLayout {
                 Layout.fillWidth: true
-                WComboBox {
+                WComboBoxList {
                     id: languageBox
-                    model: [ "Auto", "Dutch", "English", "German", "Polish", "Norwegian", "French"];
+                    textRole: 'label'
+                    model: ListModel {
+                        id: listModel
+                        ListElement { label: "Auto"; langCode: "auto" }
+                        ListElement { label: "Deutsch"; langCode: "de_DE" }
+                        ListElement { label: "English (GB)"; langCode: "en_GB" }
+                        ListElement { label: "Français"; langCode: "fr_FR" }
+                        ListElement { label: "Magyar"; langCode: "hu_HU" }
+                        ListElement { label: "Italiano"; langCode: "it_IT" }
+                        ListElement { label: "Nederlands"; langCode: "nl_NL" }
+                        ListElement { label: "Norsk bokmål"; langCode: "nb_NO" }
+                        ListElement { label: "Polski"; langCode: "pl_PL" }
+                        ListElement { label: "Ру́сский"; langCode: "ru_RU" }
+                    }
+                    sizeToContents: true
                     onCurrentIndexChanged: {
                         // Load appropriate settings
-                        switch(currentIndex) {
-                        case 1: guiHelper.addTranslator("nl_NL", this); break
-                        case 2: guiHelper.addTranslator("en_GB", this); break
-                        case 3: guiHelper.addTranslator("de_DE", this); break
-                        case 4: guiHelper.addTranslator("pl_PL", this); break
-                        case 5: guiHelper.addTranslator("nb_NO", this); break
-                        case 6: guiHelper.addTranslator("fr_FR", this); break
-                        default: guiHelper.addTranslator("auto", this); break
-                        }
+                        guiHelper.updateTranslator(listModel.get(currentIndex).langCode, this); 
                     }
                 }
 
@@ -127,8 +135,14 @@ Item {
                     }
 
                     TextStandart {
+                        id: labelSliderView
+                        Layout.alignment : Qt.AlignRight
+                        text: qsTr("Value: ")
+                    }
+
+                    TextStandart {
                         id: valueSliderView
-                        text: qsTr("Value: ") + radioController.gainValue.toFixed(2)
+                        text: radioController.gainValue.toFixed(2)
                     }
                 }
 
@@ -157,6 +171,7 @@ Item {
                 id: deviceBox
                 enabled: !enableAutoSdr.checked
                 Layout.fillWidth: true
+                // Note: Adding the translation option qsTr() into the device names are forcing to change the model which results in a currentIndex of 0 (Null device)
                 model: [ "None", "Airspy", "rtl-sdr", "SoapySDR", "rtl-tcp", "RAW file"];
                 onCurrentIndexChanged: {
                     // Load appropriate settings
@@ -168,6 +183,8 @@ Item {
                     case 5: sdrSpecificSettings.source = "qrc:/QML/settingpages/RawFileSettings.qml"; break
                     default: sdrSpecificSettings.source = "qrc:/QML/settingpages/NullSettings.qml"; break
                     }
+
+                    console.debug("Used input device: " + currentIndex)
                 }
             }
 
@@ -189,5 +206,56 @@ Item {
                     item.initDevice(enableAutoSdr.checked)
             }
         }
+
+        SettingSection {
+            text: qsTr("Style settings")
+
+            RowLayout {
+                Layout.fillWidth: true
+                WComboBoxList {
+                    id: styleBox
+                    sizeToContents: true
+                    currentIndex: guiHelper.getIndexOfQQStyle(guiHelper.getQQStyle)
+                    textRole: "label"
+                    model: guiHelper.qQStyleComboModel
+                    onActivated: {
+                        guiHelper.saveQQStyle(currentIndex)
+                        infoMessagePopup.text = qsTr("Style changed. Please restart welle.io");
+                        infoMessagePopup.open();
+                    }
+                }
+                TextStandart {
+                    text: qsTr("Style. Restart to apply.")
+                    Layout.fillWidth: true
+                }
+            }
+            RowLayout {
+                Layout.fillWidth: true
+                WComboBoxList {
+                    id: qQStyleTheme
+                    sizeToContents: true
+                    enabled: guiHelper.isThemableStyle(guiHelper.getQQStyle)
+                    textRole: 'label'
+                    model: ListModel {
+                        id: themeListModel
+                        ListElement { label: qsTr("Light"); themeCode: "Light" }
+                        ListElement { label: qsTr("Dark"); themeCode: "Dark" }
+                        ListElement { label: qsTr("System"); themeCode: "System" }
+                    }
+                }
+                TextStandart {
+                    text: qsTr("Theme")
+                    Layout.fillWidth: true
+                }
+                Connections {
+                    target: guiHelper
+                    onStyleChanged: {
+                        qQStyleTheme.enabled = guiHelper.isThemableStyle(guiHelper.getQQStyle)
+                    }
+                }
+            }
+        }
+
+
     }
 }

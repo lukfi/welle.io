@@ -853,10 +853,13 @@ bool WebRadioInterface::send_mp3(Socket& s, const std::string& stream)
     ASSERT_RX;
 
     for (const auto& srv : rx->getServiceList()) {
-        if (to_hex<4>(srv.serviceId) == stream or
-                (uint32_t)std::stoul(stream) == srv.serviceId) {
+        if (rx->serviceHasAudioComponent(srv) and
+                (to_hex<4>(srv.serviceId) == stream or
+                (uint32_t)std::stoul(stream) == srv.serviceId)) {
             try {
                 auto& ph = phs.at(srv.serviceId);
+
+                lock.unlock();
 
                 if (not send_http_response(s, http_ok, "", http_contenttype_mp3)) {
                     cerr << "Failed to send mp3 headers" << endl;
@@ -1036,7 +1039,10 @@ bool WebRadioInterface::send_null_spectrum(Socket& s)
     DSPCOMPLEX* spectrumBuffer = spectrum_fft_handler.getVector();
 
     lock_guard<mutex> lock(plotdata_mut);
-    if (last_NULL.size() != (size_t)dabparams.T_null) {
+    if (last_NULL.empty()) {
+        return false;
+    }
+    else if (last_NULL.size() != (size_t)dabparams.T_null) {
         cerr << "Invalid NULL size " << last_NULL.size() << endl;
         return false;
     }
@@ -1179,7 +1185,7 @@ bool WebRadioInterface::handle_coarse_corrector_post(Socket& s, const std::strin
         response += "Invalid coarse corrector selected";
         ssize_t ret = s.send(response.data(), response.size(), MSG_NOSIGNAL);
         if (ret == -1) {
-            cerr << "Failed to send frequency" << endl;
+            cerr << "Failed to set response" << endl;
             return false;
         }
         return true;
@@ -1198,7 +1204,7 @@ bool WebRadioInterface::handle_coarse_corrector_post(Socket& s, const std::strin
     response += "Switched Coarse corrector.";
     ssize_t ret = s.send(response.data(), response.size(), MSG_NOSIGNAL);
     if (ret == -1) {
-        cerr << "Failed to send frequency" << endl;
+        cerr << "Failed to send coarse switch confirmation" << endl;
         return false;
     }
     return true;
@@ -1421,6 +1427,7 @@ void WebRadioInterface::onSyncChange(char isSync)
 void WebRadioInterface::onSignalPresence(bool /*isSignal*/) { }
 void WebRadioInterface::onServiceDetected(uint32_t /*sId*/) { }
 void WebRadioInterface::onNewEnsemble(uint16_t /*eId*/) { }
+void WebRadioInterface::onSetEnsembleLabel(DabLabel& /*label*/) { }
 
 void WebRadioInterface::onDateTimeUpdate(const dab_date_time_t& dateTime)
 {
@@ -1478,11 +1485,17 @@ void WebRadioInterface::onConstellationPoints(std::vector<DSPCOMPLEX>&& data)
     last_constellation = move(data);
 }
 
-void WebRadioInterface::onMessage(message_level_t level, const std::string& text)
+void WebRadioInterface::onMessage(message_level_t level, const std::string& text, const std::string& text2)
 {
+    std::string fullText;
+    if (text2.empty())
+        fullText = text;
+    else
+        fullText = text + text2;
+    
     lock_guard<mutex> lock(data_mut);
     const auto now = std::chrono::system_clock::now();
-    pending_message_t m = { .level = level, .text = text, .timestamp = now};
+    pending_message_t m = { .level = level, .text = fullText, .timestamp = now};
     pending_messages.emplace_back(move(m));
 
     if (pending_messages.size() > MAX_PENDING_MESSAGES) {
@@ -1501,7 +1514,7 @@ void WebRadioInterface::onTIIMeasurement(tii_measurement_t&& m)
     }
 }
 
-void WebRadioInterface::onShutdown()
+void WebRadioInterface::onInputFailure()
 {
     std::exit(1);
 }

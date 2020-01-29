@@ -95,6 +95,10 @@ CRadioController::CRadioController(QVariantMap& commandLineOptions, QObject *par
     connect(this, &CRadioController::ensembleIdUpdated,
             this, &CRadioController::ensembleId);
 
+    qRegisterMetaType<DabLabel>("DabLabel&");
+    connect(this, &CRadioController::ensembleLabelUpdated,
+            this, &CRadioController::ensembleLabel);
+        
     connect(this, &CRadioController::serviceDetected,
             this, &CRadioController::serviceId);
 
@@ -167,27 +171,39 @@ CDeviceID CRadioController::openDevice()
 void CRadioController::setDeviceParam(QString param, int value)
 {
     if (param == "biastee") {
-        device->setDeviceParam(DeviceParam::BiasTee, value);
+        deviceParametersInt[DeviceParam::BiasTee] = value;
     }
     else {
         qDebug() << "Invalid device parameter setting: " << param;
+    }
+
+    if (device) {
+        device->setDeviceParam(DeviceParam::BiasTee, value);
     }
 }
 
 void CRadioController::setDeviceParam(QString param, QString value)
 {
-    std::string value_tmp = value.toStdString();
+    DeviceParam dp;
     if (param == "SoapySDRAntenna") {
-        device->setDeviceParam(DeviceParam::SoapySDRAntenna, value_tmp);
+        dp = DeviceParam::SoapySDRAntenna;
     }
     else if (param == "SoapySDRDriverArgs") {
-        device->setDeviceParam(DeviceParam::SoapySDRDriverArgs, value_tmp);
+        dp = DeviceParam::SoapySDRDriverArgs;
     }
     else if (param == "SoapySDRClockSource") {
-        device->setDeviceParam(DeviceParam::SoapySDRClockSource, value_tmp);
+        dp = DeviceParam::SoapySDRClockSource;
     }
     else {
         qDebug() << "Invalid device parameter setting: " << param;
+        return;
+    }
+
+    std::string v = value.toStdString();
+    deviceParametersString[dp] = v;
+
+    if (device) {
+        device->setDeviceParam(dp, v);
     }
 }
 
@@ -291,9 +307,11 @@ void CRadioController::setChannel(QString Channel, bool isScan, bool Force)
         }
 
         // Restart demodulator and decoder
-        radioReceiver = std::make_unique<RadioReceiver>(*this, *device, rro, 1);
-        radioReceiver->setReceiverOptions(rro);
-        radioReceiver->restart(isScan);
+        if(device) {
+            radioReceiver = std::make_unique<RadioReceiver>(*this, *device, rro, 1);
+            radioReceiver->setReceiverOptions(rro);
+            radioReceiver->restart(isScan);
+        }
 
         emit channelChanged();
         emit ensembleChanged();
@@ -536,6 +554,14 @@ std::vector<DSPCOMPLEX> CRadioController::getConstellationPoint()
  ********************/
 void CRadioController::initialise(void)
 {
+    for (const auto param_value : deviceParametersString) {
+        device->setDeviceParam(param_value.first, param_value.second);
+    }
+
+    for (const auto param_value : deviceParametersInt) {
+        device->setDeviceParam(param_value.first, param_value.second);
+    }
+
     gainCount = device->getGainCount();
     emit gainCountChanged(gainCount);
     emit deviceReady();
@@ -639,8 +665,21 @@ void CRadioController::ensembleId(quint16 eId)
 
     currentEId = eId;
 
-    auto label = radioReceiver->getEnsembleLabel();
-    currentEnsembleLabel = QString::fromStdString(label.utf8_label());
+    //auto label = radioReceiver->getEnsembleLabel();
+    //currentEnsembleLabel = QString::fromStdString(label.utf8_label());
+
+    //emit ensembleChanged();
+}
+
+void CRadioController::ensembleLabel(DabLabel& label)
+{
+    QString newLabel = QString::fromStdString(label.utf8_label());
+
+    if (currentEnsembleLabel == newLabel)
+        return;
+
+    qDebug() << "RadioController: Label of ensemble:" << newLabel;
+    currentEnsembleLabel = newLabel;
 
     emit ensembleChanged();
 }
@@ -835,6 +874,11 @@ void CRadioController::onNewEnsemble(quint16 eId)
     emit ensembleIdUpdated(eId);
 }
 
+void CRadioController::onSetEnsembleLabel(DabLabel& label)
+{
+    emit ensembleLabelUpdated(label);
+}
+
 void CRadioController::onDateTimeUpdate(const dab_date_time_t& dateTime)
 {
     emit dateTimeUpdated(dateTime);
@@ -876,14 +920,20 @@ void CRadioController::onTIIMeasurement(tii_measurement_t&& m)
         " with error " << m.error;
 }
 
-void CRadioController::onMessage(message_level_t level, const std::string& text)
+void CRadioController::onMessage(message_level_t level, const std::string& text, const std::string& text2)
 {
+    QString fullText;
+    if (text2.empty())
+      fullText = tr(text.c_str());
+    else
+      fullText = tr(text.c_str()) + QString::fromStdString(text2);
+    
     switch (level) {
         case message_level_t::Information:
-            emit showInfoMessage(tr(text.c_str()));
+            emit showInfoMessage(fullText);
             break;
         case message_level_t::Error:
-            emit showErrorMessage(tr(text.c_str()));
+            emit showErrorMessage(fullText);
             break;
     }
 }

@@ -28,6 +28,13 @@
 
 #include <iostream>
 
+// For Qt translation if Qt is exisiting
+#ifdef QT_CORE_LIB
+    #include <QtGlobal>
+#else
+    #define QT_TRANSLATE_NOOP(x,y) (y)
+#endif
+
 #include "input_factory.h"
 #include "null_device.h"
 #include "rtl_tcp.h"
@@ -65,9 +72,9 @@ CVirtualInput *CInputFactory::GetDevice(RadioControllerInterface& radioControlle
         std::string text;
 
         if (device == "auto")
-            text = "No valid device found use Null device instead.";
+            text = QT_TRANSLATE_NOOP("CRadioController", "No valid device found use Null device instead.");
         else
-            text = "Error while opening device";
+            text = QT_TRANSLATE_NOOP("CRadioController", "Error while opening device");
 
         radioController.onMessage(message_level_t::Error, text);
         InputDevice = new CNullDevice();
@@ -91,7 +98,7 @@ CVirtualInput *CInputFactory::GetDevice(RadioControllerInterface &radioControlle
 #endif
         case CDeviceID::RAWFILE: InputDevice = new CRAWFile(radioController); break;
 #ifdef HAVE_SOAPYSDR
-        case CDeviceID::SOAPYSDR: InputDevice = new CSoapySdr(); break;
+        case CDeviceID::SOAPYSDR: InputDevice = new CSoapySdr(radioController); break;
 #endif
 #ifdef __ANDROID__
         case CDeviceID::ANDROID_RTL_SDR: InputDevice = new CAndroid_RTL_SDR(radioController); break;
@@ -107,7 +114,7 @@ CVirtualInput *CInputFactory::GetDevice(RadioControllerInterface &radioControlle
 
     // Fallback if no device is found or an error occured
     if (InputDevice == nullptr) {
-        std::string text = "Error while opening device";
+        std::string text = QT_TRANSLATE_NOOP("CRadioController", "Error while opening device");
         radioController.onMessage(message_level_t::Error, text);
         InputDevice = new CNullDevice();
     }
@@ -131,7 +138,7 @@ CVirtualInput* CInputFactory::GetAutoDevice(RadioControllerInterface& radioContr
             case 1: inputDevice = new CRTL_SDR(radioController); break;
 #endif
 #ifdef HAVE_SOAPYSDR
-            case 2: inputDevice = new CSoapySdr(); break;
+            case 2: inputDevice = new CSoapySdr(radioController); break;
 #endif
 #ifdef __ANDROID__
             case 3: inputDevice = new CAndroid_RTL_SDR(radioController); break;
@@ -171,7 +178,7 @@ CVirtualInput* CInputFactory::GetManualDevice(RadioControllerInterface& radioCon
 #endif
 #ifdef HAVE_SOAPYSDR
         if (device == "soapysdr")
-            InputDevice = new CSoapySdr();
+            InputDevice = new CSoapySdr(radioController);
         else
 #endif
 #ifdef __ANDROID__
