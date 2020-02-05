@@ -140,8 +140,8 @@ void CRTL_SDR::setFrequency(int frequency)
     {
         std::lock_guard<std::mutex> lock(mRtlSdrMutex);
         ret = rtlsdr_set_center_freq(device, frequency + frequencyOffset);
-        restart(); // ? LF# merged - test it
     }
+    restart();
     //SDEB("Freq set: %d == %d %s(%d)", frequency + frequencyOffset, rtlsdr_get_center_freq(device), (ret == 0) ? "OK" : "FAIL", ret);
 }
 

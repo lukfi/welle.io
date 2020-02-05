@@ -150,7 +150,7 @@ void RadioController::playfm(int fmFreq, bool scan)
         if(currentFrequency != 0 && mDevice)
         {
             mFmTunerFreq = currentFrequency + 0.25 * INPUT_FM_RATE;
-            //SDEB("Tune to freq: %fMHz (%f)", currentFrequency / 1e6, mFmTunerFreq / 1e6);
+            SDEB("Tune to freq: %fMHz (%f)", currentFrequency / 1e6, mFmTunerFreq / 1e6);
             mDevice->setFrequency(static_cast<int>(mFmTunerFreq));
             mDevice->reset(); // Clear buffer
         }
@@ -655,6 +655,11 @@ void RadioController::onNewEnsemble(uint16_t eId)
     SCHEDULE_TASK(&mRadioControllerThread, &RadioController::ensembleId, this, eId);
 }
 
+void RadioController::onSetEnsembleLabel(DabLabel &label)
+{
+
+}
+
 void RadioController::onDateTimeUpdate(const dab_date_time_t& dateTime)
 {
     SCHEDULE_TASK(&mRadioControllerThread, &RadioController::displayDateTime, this, dateTime);
@@ -693,7 +698,7 @@ void RadioController::onTIIMeasurement(tii_measurement_t&& m)
          m.comb, m.pattern, m.delay_samples, m.getDelayKm(), m.error);
 }
 
-void RadioController::onMessage(message_level_t level, const std::string& text)
+void RadioController::onMessage(message_level_t level, const std::string& text, const std::string &text2)
 {
     switch (level) {
         case message_level_t::Information:
@@ -795,7 +800,7 @@ void RadioController::ResetTechnicalData()
 
 void RadioController::DeviceRestart()
 {
-    //SDEB("deviceRestart");
+    SDEB("deviceRestart");
     bool isPlay = false;
 
     if(mDevice) {
